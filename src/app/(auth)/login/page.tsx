@@ -1,7 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { LoginForm } from "@/features/auth/components/login-form";
 
 export default function LoginPage() {
   return (
@@ -12,19 +10,7 @@ export default function LoginPage() {
           <CardDescription>لوحة تحكم هيازة فايندر</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
-              <Input id="email" type="email" placeholder="admin@example.com" disabled />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">كلمة المرور</Label>
-              <Input id="password" type="password" disabled />
-            </div>
-            <Button type="submit" className="w-full" disabled>
-              تسجيل الدخول
-            </Button>
-          </form>
+          <LoginForm />
         </CardContent>
       </Card>
     </div>
