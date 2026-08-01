@@ -491,9 +491,47 @@ export type Database = {
       }
     }
     Functions: {
+      commit_import_batch: {
+        Args: {
+          p_city_id: string
+          p_file_name: string
+          p_mapping_used: Json
+          p_records: Json
+          p_rejection_log: Json
+          p_rows_imported: number
+          p_rows_rejected: number
+          p_rows_total: number
+          p_storage_path: string
+        }
+        Returns: {
+          city_id: string
+          committed_at: string | null
+          created_at: string
+          file_name: string
+          id: string
+          imported_by: string
+          mapping_used: Json | null
+          rejection_log: Json | null
+          rows_imported: number
+          rows_rejected: number
+          rows_total: number
+          status: string
+          storage_path: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "import_batches"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       current_role_is: {
         Args: { roles: Database["public"]["Enums"]["user_role"][] }
         Returns: boolean
+      }
+      rollback_import_batch: {
+        Args: { p_batch_id: string }
+        Returns: undefined
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
