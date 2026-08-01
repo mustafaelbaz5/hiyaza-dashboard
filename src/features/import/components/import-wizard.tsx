@@ -53,7 +53,10 @@ export function ImportWizard({ cityId }: { cityId: string }) {
           setCommitResult(result);
           router.refresh();
         },
-        onError: () => toast.error("فشل حفظ الاستيراد"),
+        onError: (e) => {
+          console.error("commit import failed", e);
+          toast.error(`فشل حفظ الاستيراد: ${e.message}`);
+        },
       },
     );
   }
