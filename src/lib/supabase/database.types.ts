@@ -187,9 +187,59 @@ export type Database = {
           },
         ]
       }
+      admin_actions: {
+        Row: {
+          action_type: string
+          actor_id: string | null
+          created_at: string
+          details: Json
+          entity_id: string
+          entity_name: string | null
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          action_type: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          entity_id: string
+          entity_name?: string | null
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          action_type?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          entity_id?: string
+          entity_name?: string | null
+          entity_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_actions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_actions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "team_activity"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       cities: {
         Row: {
           administration: string | null
+          association_subtype: string | null
+          association_type: Database["public"]["Enums"]["association_type"] | null
           created_at: string
           created_by: string | null
           data_version: number
@@ -201,6 +251,8 @@ export type Database = {
         }
         Insert: {
           administration?: string | null
+          association_subtype?: string | null
+          association_type?: Database["public"]["Enums"]["association_type"] | null
           created_at?: string
           created_by?: string | null
           data_version?: number
@@ -212,6 +264,8 @@ export type Database = {
         }
         Update: {
           administration?: string | null
+          association_subtype?: string | null
+          association_type?: Database["public"]["Enums"]["association_type"] | null
           created_at?: string
           created_by?: string | null
           data_version?: number
@@ -788,6 +842,10 @@ export type Database = {
           total_sqm: number
         }[]
       }
+      delete_city_cascade: {
+        Args: { p_city_id: string }
+        Returns: undefined
+      }
       commit_import_batch: {
         Args: {
           p_city_id: string
@@ -816,6 +874,7 @@ export type Database = {
       show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
+      association_type: "agricultural_credit" | "agricultural_reform"
       city_status: "draft" | "published" | "archived"
       record_status: "pending" | "approved" | "rejected"
       user_role: "admin" | "editor" | "viewer" | "field"
