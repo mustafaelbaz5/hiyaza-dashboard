@@ -70,8 +70,8 @@ export function DataTable<TData, TValue>({
     manualPagination: true,
     pageCount: pageCount ?? -1,
     state: {
-      sorting,
-      rowSelection,
+      sorting: sorting ?? [],
+      rowSelection: rowSelection ?? {},
       pagination: { pageIndex, pageSize },
     },
     onSortingChange: (updater) => {
