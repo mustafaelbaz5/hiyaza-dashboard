@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const rejectionSchema = z.object({ row: z.number(), column: z.string(), reason: z.string() });
+const blankRowSchema = z.object({ row: z.number() });
 const skippedSheetSchema = z.object({ name: z.string(), reason: z.string() });
 const parcelMismatchSchema = z.object({
   holdingIdNumber: z.string(),
@@ -13,8 +13,8 @@ export const previewResponseSchema = z.object({
   preview: z.object({
     rowsFound: z.number(),
     rowsValid: z.number(),
-    rowsRejected: z.number(),
-    rejections: z.array(rejectionSchema),
+    rowsBlank: z.number(),
+    blankRows: z.array(blankRowSchema),
     skippedSheets: z.array(skippedSheetSchema),
     detectedAssociationName: z.string().nullable(),
     detectedBasins: z.array(z.string()),

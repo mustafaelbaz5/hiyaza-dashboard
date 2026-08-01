@@ -1,5 +1,6 @@
 import type { MappedHoldingRow } from "./map-rows";
-import type { RowRejection } from "./validate-rows";
+import type { BlankRow } from "./validate-rows";
+import { computeDedupKey } from "./dedup-key";
 
 export interface SkippedSheet {
   name: string;
@@ -15,8 +16,8 @@ export interface ImportDiff {
 export interface PreviewSummary {
   rowsFound: number;
   rowsValid: number;
-  rowsRejected: number;
-  rejections: RowRejection[];
+  rowsBlank: number;
+  blankRows: BlankRow[];
   skippedSheets: SkippedSheet[];
   detectedAssociationName: string | null;
   detectedBasins: string[];
@@ -25,25 +26,28 @@ export interface PreviewSummary {
 
 /**
  * Builds the mandatory preview summary a user must see before any write happens
- * (DASHBOARD_PLAN.md § 6.3: "nothing is written until the user sees this").
+ * (DASHBOARD_PLAN.md § 6.3: "nothing is written until the user sees this"). The new/changed
+ * counts here are an *estimate* — duplicate detection, upsert-vs-insert, and per-row
+ * success/failure are only known for certain once the commit RPC actually runs (this file never
+ * touches the database), so the commit result is the authoritative summary, this is a preview.
  */
 export function buildPreviewSummary(
   validRows: MappedHoldingRow[],
-  rejected: RowRejection[],
+  blank: BlankRow[],
   rowsFound: number,
   skippedSheets: SkippedSheet[],
-  existingUnifiedNumbers: Set<string>,
+  existingDedupKeys: Set<string>,
 ): PreviewSummary {
   const associationCounts = new Map<string, number>();
   const basins = new Set<string>();
-  const incomingUnifiedNumbers = new Set<string>();
+  const incomingDedupKeys = new Set<string>();
 
   for (const row of validRows) {
     if (row.associationName) {
       associationCounts.set(row.associationName, (associationCounts.get(row.associationName) ?? 0) + 1);
     }
     if (row.basinName) basins.add(row.basinName);
-    if (row.unifiedNumber) incomingUnifiedNumbers.add(row.unifiedNumber);
+    incomingDedupKeys.add(computeDedupKey(row));
   }
 
   const detectedAssociationName =
@@ -51,19 +55,17 @@ export function buildPreviewSummary(
 
   let newCount = 0;
   let changedCount = 0;
-  for (const num of incomingUnifiedNumbers) {
-    if (existingUnifiedNumbers.has(num)) changedCount++;
+  for (const key of incomingDedupKeys) {
+    if (existingDedupKeys.has(key)) changedCount++;
     else newCount++;
   }
-  const removedCount = [...existingUnifiedNumbers].filter(
-    (num) => !incomingUnifiedNumbers.has(num),
-  ).length;
+  const removedCount = [...existingDedupKeys].filter((key) => !incomingDedupKeys.has(key)).length;
 
   return {
     rowsFound,
     rowsValid: validRows.length,
-    rowsRejected: rejected.length,
-    rejections: rejected,
+    rowsBlank: blank.length,
+    blankRows: blank,
     skippedSheets,
     detectedAssociationName,
     detectedBasins: [...basins].sort(),

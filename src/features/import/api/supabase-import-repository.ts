@@ -3,9 +3,19 @@ import type { Database, Json } from "@/lib/supabase/database.types";
 import { ok, err } from "@/lib/result";
 import { fromSupabaseError } from "@/lib/errors";
 import { TABLES } from "@/lib/constants";
-import type { CommitImportInput, ImportBatchSummary, ImportRepository } from "../types";
+import type { CommitImportInput, CommitImportResult, ImportBatchSummary, ImportRepository, ImportRowFailure } from "../types";
 
 type ImportBatchRow = Database["public"]["Tables"]["import_batches"]["Row"];
+
+interface CommitRpcResult {
+  batchId: string;
+  rowsTotal: number;
+  rowsImported: number;
+  rowsDuplicate: number;
+  rowsFailed: number;
+  rowsSkippedBlank: number;
+  failures: ImportRowFailure[];
+}
 
 function toBatchSummary(row: ImportBatchRow): ImportBatchSummary {
   return {
@@ -27,17 +37,6 @@ export function createSupabaseImportRepository(
   supabase: SupabaseClient<Database>,
 ): ImportRepository {
   return {
-    async getExistingUnifiedNumbers(cityId) {
-      const { data, error } = await supabase
-        .from(TABLES.holdings)
-        .select("unified_number")
-        .eq("city_id", cityId)
-        .not("unified_number", "is", null);
-
-      if (error) return err(fromSupabaseError(error));
-      return ok(new Set(data.map((r) => r.unified_number as string)));
-    },
-
     async listBatches(cityId) {
       const { data, error } = await supabase
         .from(TABLES.importBatches)
@@ -55,15 +54,31 @@ export function createSupabaseImportRepository(
         p_file_name: input.fileName,
         p_storage_path: input.storagePath ?? "",
         p_rows_total: input.preview.rowsFound,
-        p_rows_imported: input.preview.rowsValid,
-        p_rows_rejected: input.preview.rowsRejected,
-        p_rejection_log: input.preview.rejections as unknown as Json,
+        p_rows_skipped_blank: input.preview.rowsBlank,
         p_mapping_used: input.mappingUsed as unknown as Json,
         p_records: input.records as unknown as Json,
       });
 
       if (error) return err(fromSupabaseError(error));
-      return ok(toBatchSummary(data));
+      const result = data as unknown as CommitRpcResult;
+
+      const { data: batchRow, error: batchError } = await supabase
+        .from(TABLES.importBatches)
+        .select("*")
+        .eq("id", result.batchId)
+        .single();
+      if (batchError) return err(fromSupabaseError(batchError));
+
+      const commitResult: CommitImportResult = {
+        batch: toBatchSummary(batchRow),
+        rowsTotal: result.rowsTotal,
+        rowsImported: result.rowsImported,
+        rowsDuplicate: result.rowsDuplicate,
+        rowsFailed: result.rowsFailed,
+        rowsSkippedBlank: result.rowsSkippedBlank,
+        failures: result.failures,
+      };
+      return ok(commitResult);
     },
 
     async rollbackBatch(batchId) {
