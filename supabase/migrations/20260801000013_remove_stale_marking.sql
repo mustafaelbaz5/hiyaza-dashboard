@@ -1,12 +1,7 @@
--- Removes the deduplication constraint that was preventing duplicate rows from being imported.
--- Now all rows from an Excel file will be imported, even if they have identical values.
--- The dedup_key column is kept for future use (e.g., analytics, user-initiated deduplication),
--- but no longer enforced as a unique constraint.
+-- Removes the automatic "mark as stale" logic that was hiding old holdings
+-- when a new import was done. Now all holdings are kept active regardless
+-- of whether they appear in the latest import.
 
--- Drop the unique index on (city_id, dedup_key)
-drop index if exists holdings_city_dedup_key_unique;
-
--- Rewrite commit_import_batch to insert all rows without ON CONFLICT
 drop function if exists commit_import_batch(uuid, text, text, int, int, jsonb, jsonb);
 
 create or replace function commit_import_batch(
@@ -82,15 +77,6 @@ begin
     end;
   end loop;
 
-  -- Every holding this run actually touched (inserted) now carries this batch's id.
-  -- Anything in the city that wasn't touched is absent from the new file — mark stale, never
-  -- delete, since a field user may have edits attached to it.
-  update holdings
-  set is_stale = true
-  where city_id = p_city_id
-    and import_batch_id is distinct from v_batch.id
-    and is_stale = false;
-
   update import_batches
   set rows_imported = v_imported,
       rows_rejected = p_rows_skipped_blank + v_failed,
@@ -110,4 +96,4 @@ end;
 $$;
 
 comment on function commit_import_batch is
-  'Imports every row individually without deduplication — all rows from the file are imported, even if they have identical values. Per-row error handling ensures one bad row is recorded as a failure and skipped, never aborts the rest of the file. Returns a full per-row summary.';
+  'Imports every row individually without deduplication — all rows from the file are imported, even if they have identical values. Per-row error handling ensures one bad row is recorded as a failure and skipped, never aborts the rest of the file. Old holdings are not marked stale; all data is kept. Returns a full per-row summary.';
