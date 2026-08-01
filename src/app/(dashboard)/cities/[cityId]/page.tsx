@@ -1,4 +1,4 @@
-import { CityOverviewStats } from "@/features/cities/components/city-overview-stats";
+import { CityDrilldownBoard } from "@/features/analytics/components/city-drilldown-board";
 
 export default async function CityOverviewPage({
   params,
@@ -6,5 +6,5 @@ export default async function CityOverviewPage({
   params: Promise<{ cityId: string }>;
 }) {
   const { cityId } = await params;
-  return <CityOverviewStats cityId={cityId} />;
+  return <CityDrilldownBoard cityId={cityId} />;
 }

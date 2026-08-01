@@ -155,6 +155,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "added_holdings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "team_activity"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "added_holdings_parent_holding_id_fkey"
             columns: ["parent_holding_id"]
             isOneToOne: false
@@ -174,6 +181,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "added_holdings_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "team_activity"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -218,6 +232,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cities_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "team_activity"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -269,6 +290,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "holding_edits_edited_by_fkey"
+            columns: ["edited_by"]
+            isOneToOne: false
+            referencedRelation: "team_activity"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "holding_edits_holding_id_fkey"
@@ -436,6 +464,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "import_batches_imported_by_fkey"
+            columns: ["imported_by"]
+            isOneToOne: false
+            referencedRelation: "team_activity"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       profiles: {
@@ -465,6 +500,41 @@ export type Database = {
         }
         Relationships: []
       }
+      quality_snapshots: {
+        Row: {
+          captured_at: string
+          city_id: string
+          field_completeness: Json
+          id: string
+          issue_counts: Json
+          overall_score: number
+        }
+        Insert: {
+          captured_at?: string
+          city_id: string
+          field_completeness: Json
+          id?: string
+          issue_counts: Json
+          overall_score: number
+        }
+        Update: {
+          captured_at?: string
+          city_id?: string
+          field_completeness?: Json
+          id?: string
+          issue_counts?: Json
+          overall_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quality_snapshots_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       audit_feed: {
@@ -477,6 +547,81 @@ export type Database = {
           user_id: string | null
         }
         Relationships: []
+      }
+      city_basin_breakdown: {
+        Row: {
+          basin_name: string | null
+          city_id: string | null
+          holdings_count: number | null
+          total_feddan: number | null
+          total_sqm: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holdings_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      city_field_completeness: {
+        Row: {
+          area_pct: number | null
+          basin_code_pct: number | null
+          city_id: string | null
+          holder_name_pct: number | null
+          national_id_pct: number | null
+          total_rows: number | null
+          unified_number_pct: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holdings_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      city_quality_issues: {
+        Row: {
+          city_id: string | null
+          duplicate_unified_number: number | null
+          missing_basin_code: number | null
+          missing_or_invalid_national_id: number | null
+          placeholder_borders: number | null
+          zero_area: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holdings_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      city_top_holders: {
+        Row: {
+          city_id: string | null
+          holder_name: string | null
+          holdings_count: number | null
+          national_id: string | null
+          total_feddan: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holdings_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       holding_edits_latest: {
         Row: {
@@ -505,6 +650,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "holding_edits_edited_by_fkey"
+            columns: ["edited_by"]
+            isOneToOne: false
+            referencedRelation: "team_activity"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "holding_edits_holding_id_fkey"
             columns: ["holding_id"]
             isOneToOne: false
@@ -512,6 +664,62 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      system_overview: {
+        Row: {
+          active_users_30d: number | null
+          active_users_7d: number | null
+          archived_cities: number | null
+          cities_never_imported: number | null
+          cities_stale_90d: number | null
+          draft_cities: number | null
+          pending_reviews: number | null
+          published_cities: number | null
+          total_cities: number | null
+          total_distinct_people: number | null
+          total_feddan: number | null
+          total_holdings: number | null
+          total_qirat: number | null
+          total_sahm: number | null
+          total_sqm: number | null
+        }
+        Relationships: []
+      }
+      team_activity: {
+        Row: {
+          approval_rate: number | null
+          cities_touched: number | null
+          display_name: string | null
+          edits_made: number | null
+          email: string | null
+          last_active_at: string | null
+          records_added: number | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          user_id: string | null
+        }
+        Insert: {
+          approval_rate?: never
+          cities_touched?: never
+          display_name?: string | null
+          edits_made?: never
+          email?: string | null
+          last_active_at?: never
+          records_added?: never
+          role?: Database["public"]["Enums"]["user_role"] | null
+          user_id?: string | null
+        }
+        Update: {
+          approval_rate?: never
+          cities_touched?: never
+          display_name?: string | null
+          edits_made?: never
+          email?: string | null
+          last_active_at?: never
+          records_added?: never
+          role?: Database["public"]["Enums"]["user_role"] | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {
@@ -549,6 +757,36 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      capture_quality_snapshot: {
+        Args: { p_city_id: string }
+        Returns: {
+          captured_at: string
+          city_id: string
+          field_completeness: Json
+          id: string
+          issue_counts: Json
+          overall_score: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "quality_snapshots"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      city_drilldown: {
+        Args: { p_city_id: string }
+        Returns: {
+          added_holdings_count: number
+          holdings_count: number
+          last_edit_at: string
+          last_import_at: string
+          total_feddan: number
+          total_qirat: number
+          total_sahm: number
+          total_sqm: number
+        }[]
       }
       commit_import_batch: {
         Args: {

@@ -46,6 +46,9 @@ yarn-error.log*
 # supabase CLI local state
 /supabase/.temp/
 
+# ad-hoc verification scripts
+scratch-*.ts
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
