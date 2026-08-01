@@ -20,84 +20,128 @@ function createServiceClient() {
   );
 }
 
-test.describe("Phase 4 — Review queue & audit trail (live project)", () => {
-  let addedHoldingId: string;
+test.describe("Phase 4 — Field-added records auto-promote & audit trail (live project)", () => {
   let fieldUserId: string;
+  let fieldUserName: string;
   const service = createServiceClient();
 
   test.beforeAll(async () => {
     const { data: fieldUser } = await service
       .from("profiles")
-      .select("id")
+      .select("id, display_name")
       .eq("email", "test-field@hiyaza.local")
       .single();
     fieldUserId = fieldUser!.id;
+    fieldUserName = fieldUser!.display_name!;
   });
 
-  test.beforeEach(async () => {
-    const { data, error } = await service
+  test("a field-added record auto-promotes into holdings immediately, with full attribution in review + audit", async ({
+    page,
+  }) => {
+    const { data: added } = await service
       .from("added_holdings")
       .insert({
         city_id: TEST_CITY_ID,
         client_id: crypto.randomUUID(),
-        holder_name: "شخص جديد للاختبار",
+        holder_name: "شخص جديد للاختبار التلقائي",
         national_id: "22222222222222",
         basin_name: "حوض الاختبار",
         created_by: fieldUserId,
       })
       .select()
       .single();
-    if (error) throw error;
-    addedHoldingId = data.id;
+
+    try {
+      // The database promoted it before the dashboard ever saw it — no approval click needed.
+      await expect(async () => {
+        const { data } = await service
+          .from("added_holdings")
+          .select("status, promoted_holding_id, reviewed_by")
+          .eq("id", added!.id)
+          .single();
+        expect(data!.status).toBe("approved");
+        expect(data!.promoted_holding_id).toBeTruthy();
+        expect(data!.reviewed_by).toBe(fieldUserId);
+      }).toPass({ timeout: 10_000 });
+
+      await loginAsAdmin(page);
+      await page.goto("/review");
+      await expect(page.getByText("شخص جديد للاختبار التلقائي")).toBeVisible({ timeout: 15_000 });
+
+      const row = page.getByRole("row", { name: /شخص جديد للاختبار التلقائي/ });
+      await expect(row.getByText("موافق عليه")).toBeVisible();
+      await expect(row.getByText(fieldUserName)).toBeVisible();
+      await expect(row.getByRole("button", { name: "موافقة" })).not.toBeVisible();
+
+      await page.goto("/audit");
+      await expect(page.getByText(/شخص جديد للاختبار التلقائي/).first()).toBeVisible({ timeout: 15_000 });
+    } finally {
+      const { data: fresh } = await service
+        .from("added_holdings")
+        .select("promoted_holding_id")
+        .eq("id", added!.id)
+        .single();
+      if (fresh?.promoted_holding_id) {
+        await service.from("holdings").delete().eq("id", fresh.promoted_holding_id);
+      }
+      await service.from("added_holdings").delete().eq("id", added!.id);
+    }
   });
 
-  test.afterEach(async () => {
+  test("adding a parcel for an existing person copies their official holding number", async ({ page }) => {
+    const { data: parent } = await service
+      .from("holdings")
+      .insert({
+        city_id: TEST_CITY_ID,
+        holding_id_number: "E2E-OFFICIAL-1",
+        holder_name: "صاحب حيازة قائم للاختبار",
+        national_id: "77777777777777",
+        feddan: 2,
+      })
+      .select()
+      .single();
+
     const { data: added } = await service
       .from("added_holdings")
-      .select("promoted_holding_id")
-      .eq("id", addedHoldingId)
+      .insert({
+        city_id: TEST_CITY_ID,
+        client_id: crypto.randomUUID(),
+        parent_holding_id: parent!.id,
+        holder_name: "صاحب حيازة قائم للاختبار",
+        national_id: "77777777777777",
+        feddan: 1,
+        created_by: fieldUserId,
+      })
+      .select()
       .single();
-    if (added?.promoted_holding_id) {
-      await service.from("holdings").delete().eq("id", added.promoted_holding_id);
-    }
-    await service.from("added_holdings").delete().eq("id", addedHoldingId);
-  });
 
-  test("approving a field-added record promotes it into holdings and the audit trail shows the review", async ({
-    page,
-  }) => {
-    await loginAsAdmin(page);
-    await page.goto("/review");
-    await expect(page.getByText("شخص جديد للاختبار")).toBeVisible({ timeout: 15_000 });
+    try {
+      await expect(async () => {
+        const { data: refreshed } = await service
+          .from("added_holdings")
+          .select("promoted_holding_id")
+          .eq("id", added!.id)
+          .single();
+        expect(refreshed!.promoted_holding_id).toBeTruthy();
 
-    await page.getByRole("row", { name: /شخص جديد للاختبار/ }).getByRole("button", { name: "موافقة" }).click();
-    await page.getByRole("button", { name: "موافقة وترقية" }).click();
-    await expect(page.getByText("تمت الموافقة وترقية السجل إلى الحيازات")).toBeVisible({
-      timeout: 15_000,
-    });
-
-    // Verify the promotion actually happened server-side.
-    await expect(async () => {
-      const { data } = await service
+        const { data: newParcel } = await service
+          .from("holdings")
+          .select("holding_id_number")
+          .eq("id", refreshed!.promoted_holding_id)
+          .single();
+        expect(newParcel!.holding_id_number).toBe("E2E-OFFICIAL-1");
+      }).toPass({ timeout: 10_000 });
+    } finally {
+      const { data: fresh } = await service
         .from("added_holdings")
-        .select("status, promoted_holding_id, reviewed_by, reviewed_at")
-        .eq("id", addedHoldingId)
+        .select("promoted_holding_id")
+        .eq("id", added!.id)
         .single();
-      expect(data!.status).toBe("approved");
-      expect(data!.promoted_holding_id).toBeTruthy();
-      expect(data!.reviewed_by).toBeTruthy();
-      expect(data!.reviewed_at).toBeTruthy();
-
-      const { data: holding } = await service
-        .from("holdings")
-        .select("holder_name")
-        .eq("id", data!.promoted_holding_id)
-        .single();
-      expect(holding!.holder_name).toBe("شخص جديد للاختبار");
-    }).toPass({ timeout: 10_000 });
-
-    // The audit trail shows the review action.
-    await page.goto("/audit");
-    await expect(page.getByText(/شخص جديد للاختبار/).first()).toBeVisible({ timeout: 15_000 });
+      if (fresh?.promoted_holding_id) {
+        await service.from("holdings").delete().eq("id", fresh.promoted_holding_id);
+      }
+      await service.from("added_holdings").delete().eq("id", added!.id);
+      await service.from("holdings").delete().eq("id", parent!.id);
+    }
   });
 });
