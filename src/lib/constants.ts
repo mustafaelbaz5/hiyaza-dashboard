@@ -4,6 +4,7 @@ export const TABLES = {
   cities: "cities",
   holdings: "holdings",
   holdingEdits: "holding_edits",
+  holdingEditsLatest: "holding_edits_latest",
   addedHoldings: "added_holdings",
   importBatches: "import_batches",
   qualitySnapshots: "quality_snapshots",
