@@ -55,3 +55,22 @@ export function useSetCityStatus(cityId: string) {
     },
   });
 }
+
+/**
+ * Permanently deletes a city. The database refuses this (foreign key restrict on
+ * holdings/import_batches) if the city has any imported data — archive is the only path for a
+ * city with real data. This only succeeds for an empty/never-imported city.
+ */
+export function useDeleteCity() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (cityId: string) => {
+      const repo = createSupabaseCitiesRepository(createClient());
+      const result = await repo.delete(cityId);
+      if (!result.ok) throw result.error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.cities.all });
+    },
+  });
+}
