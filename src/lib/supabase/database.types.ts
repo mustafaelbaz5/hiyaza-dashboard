@@ -1,7 +1,3 @@
-/**
- * GENERATED FILE — do not hand-edit.
- * Regenerate with: npx supabase gen types typescript --linked > src/lib/supabase/database.types.ts
- */
 export type Json =
   | string
   | number
@@ -318,6 +314,7 @@ export type Database = {
           border_south: string | null
           border_west: string | null
           city_id: string
+          dedup_key: string | null
           directorate: string | null
           feddan: number
           holder_name: string | null
@@ -344,6 +341,7 @@ export type Database = {
           border_south?: string | null
           border_west?: string | null
           city_id: string
+          dedup_key?: string | null
           directorate?: string | null
           feddan?: number
           holder_name?: string | null
@@ -370,6 +368,7 @@ export type Database = {
           border_south?: string | null
           border_west?: string | null
           city_id?: string
+          dedup_key?: string | null
           directorate?: string | null
           feddan?: number
           holder_name?: string | null
@@ -735,6 +734,7 @@ export type Database = {
           border_south: string | null
           border_west: string | null
           city_id: string
+          dedup_key: string | null
           directorate: string | null
           feddan: number
           holder_name: string | null
@@ -794,33 +794,11 @@ export type Database = {
           p_file_name: string
           p_mapping_used: Json
           p_records: Json
-          p_rejection_log: Json
-          p_rows_imported: number
-          p_rows_rejected: number
+          p_rows_skipped_blank: number
           p_rows_total: number
           p_storage_path: string
         }
-        Returns: {
-          city_id: string
-          committed_at: string | null
-          created_at: string
-          file_name: string
-          id: string
-          imported_by: string
-          mapping_used: Json | null
-          rejection_log: Json | null
-          rows_imported: number
-          rows_rejected: number
-          rows_total: number
-          status: string
-          storage_path: string | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "import_batches"
-          isOneToOne: true
-          isSetofReturn: false
-        }
+        Returns: Json
       }
       current_role_is: {
         Args: { roles: Database["public"]["Enums"]["user_role"][] }
