@@ -102,7 +102,7 @@ export function HoldingsTable({ cityId }: { cityId: string }) {
             setPageIndex(0);
           }}
         >
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-48" aria-label="تصفية حسب الحوض">
             <SelectValue placeholder="كل الأحواض" />
           </SelectTrigger>
           <SelectContent>

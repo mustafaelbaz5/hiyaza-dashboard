@@ -18,7 +18,7 @@ export function CitySwitcher() {
       value={activeCityId}
       onValueChange={(cityId) => router.push(`/cities/${cityId}`)}
     >
-      <SelectTrigger className="w-48" size="sm">
+      <SelectTrigger className="w-48" size="sm" aria-label="اختر جمعية">
         <SelectValue placeholder="اختر جمعية" />
       </SelectTrigger>
       <SelectContent>

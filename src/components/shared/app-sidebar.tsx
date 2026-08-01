@@ -19,14 +19,17 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useNotificationCounts } from "@/features/notifications/hooks/use-notification-counts";
+import { formatNumber } from "@/lib/format";
 
 const NAV_ITEMS = [
   { href: "/", label: "نظرة عامة", icon: LayoutDashboard },
   { href: "/cities", label: "المدن", icon: Building2 },
-  { href: "/review", label: "المراجعة", icon: ClipboardCheck },
+  { href: "/review", label: "المراجعة", icon: ClipboardCheck, badge: "pendingReviews" as const },
   { href: "/audit", label: "سجل النشاط", icon: History },
   { href: "/analytics", label: "التحليلات", icon: BarChart3 },
   { href: "/users", label: "المستخدمون", icon: Users },
@@ -36,6 +39,7 @@ const NAV_ITEMS = [
 /** Persistent right-side (RTL) navigation — collapsible to icons, active route highlighted. */
 export function AppSidebar() {
   const pathname = usePathname();
+  const { data: counts } = useNotificationCounts();
 
   return (
     <Sidebar side="right" collapsible="icon">
@@ -52,8 +56,9 @@ export function AppSidebar() {
           <SidebarGroupLabel>القائمة</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+              {NAV_ITEMS.map(({ href, label, icon: Icon, ...rest }) => {
                 const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+                const badgeCount = "badge" in rest && counts ? counts[rest.badge] : 0;
                 return (
                   <SidebarMenuItem key={href}>
                     <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
@@ -62,6 +67,7 @@ export function AppSidebar() {
                         <span>{label}</span>
                       </Link>
                     </SidebarMenuButton>
+                    {badgeCount > 0 ? <SidebarMenuBadge>{formatNumber(badgeCount)}</SidebarMenuBadge> : null}
                   </SidebarMenuItem>
                 );
               })}

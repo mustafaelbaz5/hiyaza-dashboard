@@ -29,7 +29,7 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
+        <Button variant="ghost" size="icon" className="rounded-full" aria-label="قائمة الحساب">
           <Avatar className="size-8">
             <AvatarFallback>
               <User className="size-4" />

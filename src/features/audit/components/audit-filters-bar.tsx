@@ -24,7 +24,7 @@ const ENTITY_OPTIONS: { value: AuditEntityType | "all"; label: string }[] = [
 export function AuditFiltersBar({ entityType, onEntityTypeChange }: AuditFiltersBarProps) {
   return (
     <Select value={entityType} onValueChange={(v) => onEntityTypeChange(v as AuditEntityType | "all")}>
-      <SelectTrigger className="w-48">
+      <SelectTrigger className="w-48" aria-label="نوع النشاط">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

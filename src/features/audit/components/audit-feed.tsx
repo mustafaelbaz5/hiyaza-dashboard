@@ -55,6 +55,7 @@ export function AuditFeed({ filters }: { filters: AuditFilters }) {
                     variant="ghost"
                     size="icon"
                     className="size-7"
+                    aria-label={isExpanded ? "إخفاء التفاصيل" : "عرض التفاصيل"}
                     onClick={() => setExpandedId(isExpanded ? null : key)}
                   >
                     {isExpanded ? <ChevronUp /> : <ChevronDown />}
