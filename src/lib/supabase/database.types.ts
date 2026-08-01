@@ -50,6 +50,8 @@ export type Database = {
           promoted_holding_id: string | null
           qirat: number
           rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           sahm: number
           status: Database["public"]["Enums"]["record_status"]
           total_sqm: number | null
@@ -88,6 +90,8 @@ export type Database = {
           promoted_holding_id?: string | null
           qirat?: number
           rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           sahm?: number
           status?: Database["public"]["Enums"]["record_status"]
           total_sqm?: number | null
@@ -126,6 +130,8 @@ export type Database = {
           promoted_holding_id?: string | null
           qirat?: number
           rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           sahm?: number
           status?: Database["public"]["Enums"]["record_status"]
           total_sqm?: number | null
@@ -160,6 +166,13 @@ export type Database = {
             columns: ["promoted_holding_id"]
             isOneToOne: false
             referencedRelation: "holdings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "added_holdings_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -454,6 +467,17 @@ export type Database = {
       }
     }
     Views: {
+      audit_feed: {
+        Row: {
+          city_id: string | null
+          details: Json | null
+          entity_id: string | null
+          entity_type: string | null
+          occurred_at: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
       holding_edits_latest: {
         Row: {
           city_id: string | null
@@ -491,6 +515,41 @@ export type Database = {
       }
     }
     Functions: {
+      approve_added_holding: {
+        Args: { p_added_holding_id: string; p_holding_id_number: string }
+        Returns: {
+          administration: string | null
+          association_name: string | null
+          basin_code: string | null
+          basin_name: string | null
+          border_east: string | null
+          border_north: string | null
+          border_south: string | null
+          border_west: string | null
+          city_id: string
+          directorate: string | null
+          feddan: number
+          holder_name: string | null
+          holding_id_number: string | null
+          id: string
+          import_batch_id: string | null
+          imported_at: string
+          is_stale: boolean
+          land_number: string | null
+          national_id: string | null
+          page_number: string | null
+          qirat: number
+          sahm: number
+          total_sqm: number | null
+          unified_number: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "holdings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       commit_import_batch: {
         Args: {
           p_city_id: string
@@ -528,6 +587,10 @@ export type Database = {
       current_role_is: {
         Args: { roles: Database["public"]["Enums"]["user_role"][] }
         Returns: boolean
+      }
+      reject_added_holding: {
+        Args: { p_added_holding_id: string; p_reason: string }
+        Returns: undefined
       }
       rollback_import_batch: {
         Args: { p_batch_id: string }
