@@ -61,8 +61,8 @@ export function AppSidebar() {
                 const badgeCount = "badge" in rest && counts ? counts[rest.badge] : 0;
                 return (
                   <SidebarMenuItem key={href}>
-                    <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
-                      <Link href={href}>
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={label} size="lg">
+                      <Link href={href} className="cursor-pointer">
                         <Icon />
                         <span>{label}</span>
                       </Link>
