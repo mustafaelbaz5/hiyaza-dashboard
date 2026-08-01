@@ -3,8 +3,8 @@
 -- The dedup_key column is kept for future use (e.g., analytics, user-initiated deduplication),
 -- but no longer enforced as a unique constraint.
 
--- Drop the unique constraint on (city_id, dedup_key)
-alter table holdings drop constraint if exists holdings_city_id_dedup_key_key;
+-- Drop the unique index on (city_id, dedup_key)
+drop index if exists holdings_city_dedup_key_unique;
 
 -- Rewrite commit_import_batch to insert all rows without ON CONFLICT
 drop function if exists commit_import_batch(uuid, text, text, int, int, jsonb, jsonb);
