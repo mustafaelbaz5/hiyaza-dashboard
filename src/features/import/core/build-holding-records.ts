@@ -2,10 +2,10 @@ import type { MappedHoldingRow } from "./map-rows";
 
 export interface HoldingInsertRecord {
   city_id: string;
-  import_batch_id: string;
+  source_row_number: number;
   holding_id_number: string | null;
   unified_number: string | null;
-  holder_name: string;
+  holder_name: string | null;
   national_id: string | null;
   land_number: string | null;
   page_number: string | null;
@@ -24,18 +24,19 @@ export interface HoldingInsertRecord {
   total_sqm: number | null;
 }
 
-/** Shapes validated rows into holdings insert records — the only place that knows the DB column names. */
-export function buildHoldingRecords(
-  rows: MappedHoldingRow[],
-  cityId: string,
-  importBatchId: string,
-): HoldingInsertRecord[] {
+/**
+ * Shapes mapped rows into holdings insert records — the only place that knows the DB column
+ * names. Every row is included: holder_name may be null (nullable in the schema), and the
+ * commit RPC decides per-row success/failure/duplicate itself rather than this layer
+ * pre-filtering anything.
+ */
+export function buildHoldingRecords(rows: MappedHoldingRow[], cityId: string): HoldingInsertRecord[] {
   return rows.map((row) => ({
     city_id: cityId,
-    import_batch_id: importBatchId,
+    source_row_number: row.sourceRowNumber,
     holding_id_number: row.holdingIdNumber,
     unified_number: row.unifiedNumber,
-    holder_name: row.holderName as string,
+    holder_name: row.holderName,
     national_id: row.nationalId,
     land_number: row.landNumber,
     page_number: row.pageNumber,

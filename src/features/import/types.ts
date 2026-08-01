@@ -16,6 +16,23 @@ export interface ImportBatchSummary {
   committedAt: string | null;
 }
 
+export interface ImportRowFailure {
+  row: number;
+  holderName: string | null;
+  reason: string;
+}
+
+/** The commit RPC's authoritative, per-row result — what actually happened, not an estimate. */
+export interface CommitImportResult {
+  batch: ImportBatchSummary;
+  rowsTotal: number;
+  rowsImported: number;
+  rowsDuplicate: number;
+  rowsFailed: number;
+  rowsSkippedBlank: number;
+  failures: ImportRowFailure[];
+}
+
 export interface CommitImportInput {
   cityId: string;
   fileName: string;
@@ -26,8 +43,7 @@ export interface CommitImportInput {
 }
 
 export interface ImportRepository {
-  getExistingUnifiedNumbers(cityId: string): Promise<Result<Set<string>, AppError>>;
   listBatches(cityId: string): Promise<Result<ImportBatchSummary[], AppError>>;
-  commitImport(input: CommitImportInput): Promise<Result<ImportBatchSummary, AppError>>;
+  commitImport(input: CommitImportInput): Promise<Result<CommitImportResult, AppError>>;
   rollbackBatch(batchId: string): Promise<Result<void, AppError>>;
 }

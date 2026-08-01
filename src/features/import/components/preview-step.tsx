@@ -16,18 +16,6 @@ interface PreviewStepProps {
   isCommitting: boolean;
 }
 
-function downloadRejectionsCsv(rejections: PreviewResponse["preview"]["rejections"]) {
-  const header = "row,column,reason\n";
-  const body = rejections.map((r) => `${r.row},"${r.column}","${r.reason}"`).join("\n");
-  const blob = new Blob([header + body], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "rejected-rows.csv";
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
 /** Step 2 — the mandatory preview. Nothing is written until the user confirms this screen. */
 export function PreviewStep({ data, fileName, onConfirm, onCancel, isCommitting }: PreviewStepProps) {
   const { preview, parcelMismatches, records } = data;
@@ -41,15 +29,20 @@ export function PreviewStep({ data, fileName, onConfirm, onCancel, isCommitting 
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-3">
             <StatCard label="صفوف موجودة" value={formatNumber(preview.rowsFound)} />
-            <StatCard label="صفوف صالحة" value={formatNumber(preview.rowsValid)} />
-            <StatCard label="صفوف مرفوضة" value={formatNumber(preview.rowsRejected)} />
+            <StatCard label="صفوف قابلة للاستيراد" value={formatNumber(preview.rowsValid)} />
+            <StatCard label="صفوف فارغة تمامًا" value={formatNumber(preview.rowsBlank)} />
           </div>
+
+          <p className="text-sm text-muted-foreground">
+            كل صف يحتوي على أي بيانات سيُستورد، حتى لو كانت بعض الحقول فارغة — لا يتم تجاهل أي بيانات عمل.
+            الصفوف &quot;الفارغة تمامًا&quot; فقط (بلا أي بيانات في أي عمود) لا تُستورد لأنها ليست سجلات فعلية.
+          </p>
 
           <Separator />
 
           <div className="grid gap-2 text-sm sm:grid-cols-3">
-            <p>جديد: <span className="font-medium text-primary">{preview.diff.newCount}</span></p>
-            <p>معدّل: <span className="font-medium">{preview.diff.changedCount}</span></p>
+            <p>جديد (تقديري): <span className="font-medium text-primary">{preview.diff.newCount}</span></p>
+            <p>مكرر — سيُحدَّث (تقديري): <span className="font-medium">{preview.diff.changedCount}</span></p>
             <p>غير موجود بالملف: <span className="font-medium text-destructive">{preview.diff.removedCount}</span></p>
           </div>
 
@@ -73,12 +66,6 @@ export function PreviewStep({ data, fileName, onConfirm, onCancel, isCommitting 
             <p className="text-sm text-destructive">
               تحذير: {parcelMismatches.length} حيازة لا يتطابق عدد قطعها مع العمود S
             </p>
-          ) : null}
-
-          {preview.rejections.length > 0 ? (
-            <Button variant="link" className="h-auto p-0" onClick={() => downloadRejectionsCsv(preview.rejections)}>
-              تنزيل الصفوف المرفوضة (CSV)
-            </Button>
           ) : null}
         </CardContent>
       </Card>

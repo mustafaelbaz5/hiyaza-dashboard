@@ -1,56 +1,59 @@
 import type { MappedHoldingRow } from "./map-rows";
 
-export interface RowRejection {
+export interface BlankRow {
   row: number;
-  column: string;
-  reason: string;
 }
 
 export interface ValidatedRows {
+  /** Every row with any real data — imported regardless of which fields are missing. */
   valid: MappedHoldingRow[];
-  rejected: RowRejection[];
+  /** Rows with literally no data in any field — spreadsheet artifacts (e.g. a trailing blank
+   *  row past the real data range), not business records. Not "invalid data" — there is no data. */
+  blank: BlankRow[];
+}
+
+const IDENTIFYING_FIELDS: (keyof MappedHoldingRow)[] = [
+  "holdingIdNumber",
+  "unifiedNumber",
+  "holderName",
+  "nationalId",
+  "landNumber",
+  "pageNumber",
+  "basinCode",
+  "basinName",
+  "associationName",
+  "administration",
+  "directorate",
+  "borderEast",
+  "borderWest",
+  "borderSouth",
+  "borderNorth",
+];
+
+function isEntirelyBlank(row: MappedHoldingRow): boolean {
+  const hasAnyText = IDENTIFYING_FIELDS.some((field) => row[field] !== null);
+  const hasAnyArea = row.feddan !== 0 || row.qirat !== 0 || row.sahm !== 0 || (row.totalSqm ?? 0) !== 0;
+  return !hasAnyText && !hasAnyArea;
 }
 
 /**
- * Rejects rows that are structurally unusable (no holder name), or that would silently corrupt
- * data on write: فدان/قيراط/سهم are `int` columns in the real schema (APP_PLAN.md § 6), and a
- * fractional سهم (confirmed present in ~0.6% of the real sample workbook) cannot be rounded
- * without changing a legal land-share value — reject and surface it instead of guessing.
- * Everything else (bad national id, zero area, missing basin) is intentionally *not* a blocker —
- * those are recomputed live from `holdings` by the quality board (DASHBOARD_PLAN.md § 6.7).
+ * The source Excel file is the source of truth (business requirement) — every row with any real
+ * data is imported, however incomplete. Missing values (missing holder name, national id, crop
+ * type, notes, area, borders, credit type, etc.) are business data as-is, not import errors, and
+ * are never a reason to drop a row. The only rows set aside here are ones with no data in any
+ * field at all — an artifact of the spreadsheet, not a record to import.
  */
 export function validateRows(rows: MappedHoldingRow[]): ValidatedRows {
   const valid: MappedHoldingRow[] = [];
-  const rejected: RowRejection[] = [];
+  const blank: BlankRow[] = [];
 
   for (const row of rows) {
-    if (!row.holderName) {
-      rejected.push({
-        row: row.sourceRowNumber,
-        column: "اسم الحائز",
-        reason: "اسم الحائز مفقود — لا يمكن استيراد صف بدون اسم",
-      });
+    if (isEntirelyBlank(row)) {
+      blank.push({ row: row.sourceRowNumber });
       continue;
     }
-
-    const fractionalField = ([
-      ["فدان", row.feddan],
-      ["قيراط", row.qirat],
-      ["سهم", row.sahm],
-    ] as const).find(([, value]) => !Number.isInteger(value));
-
-    if (fractionalField) {
-      const [column, value] = fractionalField;
-      rejected.push({
-        row: row.sourceRowNumber,
-        column,
-        reason: `قيمة "${column}" (${value}) ليست عددًا صحيحًا — يتطلب مراجعة يدوية قبل الاستيراد`,
-      });
-      continue;
-    }
-
     valid.push(row);
   }
 
-  return { valid, rejected };
+  return { valid, blank };
 }

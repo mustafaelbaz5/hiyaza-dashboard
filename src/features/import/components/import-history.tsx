@@ -55,7 +55,7 @@ export function ImportHistory({ cityId }: { cityId: string }) {
       cell: ({ row }) => <Badge variant="secondary">{STATUS_LABELS[row.original.status] ?? row.original.status}</Badge>,
     },
     { accessorKey: "rowsImported", header: "صفوف مستوردة" },
-    { accessorKey: "rowsRejected", header: "صفوف مرفوضة" },
+    { accessorKey: "rowsRejected", header: "صفوف فارغة/فشلت" },
     {
       accessorKey: "committedAt",
       header: "تاريخ الاعتماد",
