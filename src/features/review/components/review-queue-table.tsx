@@ -12,7 +12,11 @@ import { useReviewQueue } from "../hooks/use-review-queue";
 import { formatDate } from "@/lib/format";
 import type { AddedHolding } from "../types";
 
-/** Review queue: field-added records with approve/reject actions (DASHBOARD_PLAN.md § 6.5). */
+/**
+ * Field-added records log. Every submission auto-promotes into `holdings` immediately (no
+ * manual approval step) — this table is now primarily a "who added what, when" history, not a
+ * gate. Approve/reject stay available for the rare row that isn't already approved.
+ */
 export function ReviewQueueTable({ cityId }: { cityId?: string }) {
   const { data, isLoading, error, refetch } = useReviewQueue({ cityId });
   const [approving, setApproving] = useState<AddedHolding | null>(null);
@@ -24,9 +28,14 @@ export function ReviewQueueTable({ cityId }: { cityId?: string }) {
     { accessorKey: "nationalId", header: "الرقم القومي", cell: ({ row }) => row.original.nationalId ?? "—" },
     { accessorKey: "basinName", header: "اسم الحوض", cell: ({ row }) => row.original.basinName ?? "—" },
     {
+      accessorKey: "createdByName",
+      header: "أضافه",
+      cell: ({ row }) => row.original.createdByName ?? "—",
+    },
+    {
       accessorKey: "createdAt",
       header: "تاريخ الإضافة",
-      cell: ({ row }) => formatDate(row.original.createdAt),
+      cell: ({ row }) => formatDate(row.original.createdAt, { dateStyle: "medium", timeStyle: "short" }),
     },
     {
       accessorKey: "status",
@@ -58,10 +67,10 @@ export function ReviewQueueTable({ cityId }: { cityId?: string }) {
         columns={columns}
         data={rows}
         isLoading={isLoading}
-        error={error ? "تعذر تحميل قائمة المراجعة" : undefined}
+        error={error ? "تعذر تحميل سجل الإضافات" : undefined}
         onRetry={() => refetch()}
-        emptyTitle="لا توجد سجلات بانتظار المراجعة"
-        emptyDescription="سيظهر هنا أي بيانات أضافها فريق الميدان"
+        emptyTitle="لا توجد سجلات بعد"
+        emptyDescription="سيظهر هنا كل ما يضيفه فريق الميدان — يُضاف تلقائيًا للنظام فور إرساله"
       />
       <ApproveDialog record={approving} onOpenChange={(open) => !open && setApproving(null)} />
       <RejectDialog record={rejecting} onOpenChange={(open) => !open && setRejecting(null)} />

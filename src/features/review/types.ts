@@ -21,6 +21,7 @@ export interface AddedHolding {
   status: ReviewStatus;
   rejectionReason: string | null;
   createdBy: string;
+  createdByName: string | null;
   reviewedBy: string | null;
   reviewedAt: string | null;
   promotedHoldingId: string | null;

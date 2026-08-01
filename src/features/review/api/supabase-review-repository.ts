@@ -5,7 +5,9 @@ import { fromSupabaseError } from "@/lib/errors";
 import { TABLES } from "@/lib/constants";
 import type { AddedHolding, ApproveInput, RejectInput, ReviewListParams, ReviewRepository } from "../types";
 
-type AddedHoldingRow = Database["public"]["Tables"]["added_holdings"]["Row"];
+type AddedHoldingRow = Database["public"]["Tables"]["added_holdings"]["Row"] & {
+  creator?: { display_name: string | null } | null;
+};
 
 function toAddedHolding(row: AddedHoldingRow): AddedHolding {
   return {
@@ -25,6 +27,7 @@ function toAddedHolding(row: AddedHoldingRow): AddedHolding {
     status: row.status,
     rejectionReason: row.rejection_reason,
     createdBy: row.created_by,
+    createdByName: row.creator?.display_name ?? null,
     reviewedBy: row.reviewed_by,
     reviewedAt: row.reviewed_at,
     promotedHoldingId: row.promoted_holding_id,
@@ -38,13 +41,16 @@ export function createSupabaseReviewRepository(
 ): ReviewRepository {
   return {
     async list(params: ReviewListParams) {
-      let query = supabase.from(TABLES.addedHoldings).select("*").order("created_at", { ascending: false });
+      let query = supabase
+        .from(TABLES.addedHoldings)
+        .select("*, creator:profiles!added_holdings_created_by_fkey(display_name)")
+        .order("created_at", { ascending: false });
       if (params.cityId) query = query.eq("city_id", params.cityId);
       if (params.status) query = query.eq("status", params.status);
 
       const { data, error } = await query;
       if (error) return err(fromSupabaseError(error));
-      return ok(data.map(toAddedHolding));
+      return ok((data as AddedHoldingRow[]).map(toAddedHolding));
     },
 
     async approve(input: ApproveInput) {
