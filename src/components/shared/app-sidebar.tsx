@@ -29,7 +29,7 @@ import { formatNumber } from "@/lib/format";
 const NAV_ITEMS = [
   { href: "/", label: "نظرة عامة", icon: LayoutDashboard },
   { href: "/cities", label: "المدن", icon: Building2 },
-  { href: "/review", label: "المراجعة", icon: ClipboardCheck, badge: "pendingReviews" as const },
+  { href: "/review", label: "الإضافات الميدانية", icon: ClipboardCheck, badge: "pendingReviews" as const },
   { href: "/audit", label: "سجل النشاط", icon: History },
   { href: "/analytics", label: "التحليلات", icon: BarChart3 },
   { href: "/users", label: "المستخدمون", icon: Users },

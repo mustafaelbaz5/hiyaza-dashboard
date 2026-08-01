@@ -4,7 +4,10 @@ import { ReviewQueueTable } from "@/features/review/components/review-queue-tabl
 export default function ReviewPage() {
   return (
     <>
-      <PageHeader title="المراجعة" description="مراجعة البيانات المضافة من فريق الميدان" />
+      <PageHeader
+        title="سجل الإضافات الميدانية"
+        description="كل بيانات أضافها فريق الميدان — تُضاف تلقائيًا للنظام فور إرسالها، ومعروضة هنا للتدقيق"
+      />
       <ReviewQueueTable />
     </>
   );

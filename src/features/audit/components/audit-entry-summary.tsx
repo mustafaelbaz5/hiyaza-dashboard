@@ -7,6 +7,12 @@ const ENTITY_LABELS: Record<AuditEntryWithUser["entityType"], string> = {
   added_holding: "سجل ميداني",
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  approved: "أُضيف تلقائيًا للنظام",
+  pending: "بانتظار المراجعة",
+  rejected: "مرفوض",
+};
+
 /** One-line human-readable summary of an audit_feed row's `details` JSON, per entity type. */
 export function AuditEntrySummary({ entry }: { entry: AuditEntryWithUser }) {
   const d = entry.details;
@@ -22,7 +28,7 @@ export function AuditEntrySummary({ entry }: { entry: AuditEntryWithUser }) {
       {entry.entityType === "holding_edit" ? <span>عدّل بيانات حيازة</span> : null}
       {entry.entityType === "added_holding" ? (
         <span>
-          {String(d.holder_name)} — {String(d.status)}
+          {String(d.holder_name)} — {STATUS_LABELS[String(d.status)] ?? String(d.status)}
           {d.rejection_reason ? ` (${d.rejection_reason})` : ""}
         </span>
       ) : null}

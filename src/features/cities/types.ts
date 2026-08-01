@@ -38,4 +38,5 @@ export interface CityRepository {
   create(input: CreateCityInput): Promise<Result<City, AppError>>;
   update(cityId: string, input: UpdateCityInput): Promise<Result<City, AppError>>;
   setStatus(cityId: string, status: CityStatus): Promise<Result<City, AppError>>;
+  delete(cityId: string): Promise<Result<void, AppError>>;
 }

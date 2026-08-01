@@ -3,6 +3,7 @@
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useSetCityStatus } from "../hooks/use-city-mutations";
+import { DeleteCityDialog } from "./delete-city-dialog";
 import type { City } from "../types";
 
 /** The Phase 5 "publish/unpublish gates what reaches the app" control, surfaced on city detail. */
@@ -31,7 +32,11 @@ export function CityPublishActions({ city }: { city: City }) {
   }
 
   if (city.status === "archived") {
-    return null;
+    return (
+      <div className="flex items-center gap-2">
+        <DeleteCityDialog city={city} redirectOnSuccess />
+      </div>
+    );
   }
 
   return (
@@ -48,6 +53,7 @@ export function CityPublishActions({ city }: { city: City }) {
       <Button size="sm" variant="ghost" onClick={archive} disabled={setStatus.isPending}>
         أرشفة
       </Button>
+      <DeleteCityDialog city={city} redirectOnSuccess />
     </div>
   );
 }

@@ -17,5 +17,11 @@ export function fromSupabaseError(error: { message: string; code?: string }): Ap
   if (error.code === "23505") {
     return { code: "conflict", message: "هذا السجل موجود بالفعل" };
   }
+  if (error.code === "23503") {
+    return {
+      code: "conflict",
+      message: "لا يمكن الحذف — توجد بيانات مرتبطة بهذا السجل (حيازات أو سجلات استيراد). أرشفه بدلاً من ذلك.",
+    };
+  }
   return { code: "database", message: error.message, cause: error };
 }

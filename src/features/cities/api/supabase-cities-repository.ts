@@ -111,5 +111,11 @@ export function createSupabaseCitiesRepository(
       if (error) return err(fromSupabaseError(error));
       return ok(toCity(data));
     },
+
+    async delete(cityId: string) {
+      const { error } = await supabase.from(TABLES.cities).delete().eq("id", cityId);
+      if (error) return err(fromSupabaseError(error));
+      return ok(undefined);
+    },
   };
 }
