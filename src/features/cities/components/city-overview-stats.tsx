@@ -4,11 +4,7 @@ import { Building2, Upload } from "lucide-react";
 import { StatCard } from "@/components/shared/stat-card";
 import { ErrorState } from "@/components/shared/error-state";
 import { useCity } from "../hooks/use-city";
-
-function formatDate(value: string | null | undefined) {
-  if (!value) return "لم يتم الاستيراد بعد";
-  return new Intl.DateTimeFormat("ar-EG", { dateStyle: "medium" }).format(new Date(value));
-}
+import { formatDate } from "@/lib/format";
 
 /**
  * City overview stat tiles. Keeps to what's cheaply queryable from `cities`/`holdings` directly —
@@ -32,7 +28,7 @@ export function CityOverviewStats({ cityId }: { cityId: string }) {
       />
       <StatCard
         label="تاريخ آخر تحديث"
-        value={formatDate(city?.updatedAt)}
+        value={city?.updatedAt ? formatDate(city.updatedAt) : "لم يتم الاستيراد بعد"}
         icon={Upload}
         isLoading={isLoading}
       />

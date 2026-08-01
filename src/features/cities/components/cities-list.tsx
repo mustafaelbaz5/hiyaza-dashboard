@@ -7,11 +7,7 @@ import { DataTable } from "@/components/shared/data-table";
 import { CityStatusBadge } from "./city-status-badge";
 import { useCities } from "../hooks/use-cities";
 import type { CityWithStats } from "../types";
-
-function formatDate(value: string | null) {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat("ar-EG", { dateStyle: "medium" }).format(new Date(value));
-}
+import { formatDate, formatNumber } from "@/lib/format";
 
 const columns: ColumnDef<CityWithStats>[] = [
   {
@@ -28,7 +24,7 @@ const columns: ColumnDef<CityWithStats>[] = [
   {
     accessorKey: "holdingsCount",
     header: "عدد الحيازات",
-    cell: ({ row }) => row.original.holdingsCount.toLocaleString("ar-EG"),
+    cell: ({ row }) => formatNumber(row.original.holdingsCount),
   },
   {
     accessorKey: "lastImportAt",
