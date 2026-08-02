@@ -1,5 +1,6 @@
 import type { Result } from "@/lib/result";
 import type { AppError } from "@/lib/errors";
+import type { AssociationType } from "@/lib/constants";
 import type { PreviewSummary } from "./core/preview-summary";
 import type { HoldingInsertRecord } from "./core/build-holding-records";
 
@@ -40,6 +41,8 @@ export interface CommitImportInput {
   preview: PreviewSummary;
   records: HoldingInsertRecord[];
   mappingUsed: Record<string, string>;
+  /** The type the admin confirmed on the preview screen — null if left unset/unconfirmed. */
+  confirmedAssociationType?: AssociationType | null;
 }
 
 export interface ImportRepository {

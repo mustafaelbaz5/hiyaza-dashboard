@@ -62,6 +62,16 @@ export function createSupabaseImportRepository(
       if (error) return err(fromSupabaseError(error));
       const result = data as unknown as CommitRpcResult;
 
+      if (input.confirmedAssociationType) {
+        // Best-effort: the import itself already succeeded above, so a failure here would be
+        // confusing to surface as an import failure — the admin can still set the type manually
+        // from Settings if this update doesn't land.
+        await supabase
+          .from(TABLES.cities)
+          .update({ association_type: input.confirmedAssociationType })
+          .eq("id", input.cityId);
+      }
+
       const { data: batchRow, error: batchError } = await supabase
         .from(TABLES.importBatches)
         .select("*")

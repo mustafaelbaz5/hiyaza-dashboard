@@ -1,29 +1,40 @@
-import { Controller, type Control, type FieldErrors, type UseFormSetValue } from "react-hook-form";
+import { Controller, type Control, type FieldErrors, type Path, type UseFormSetValue } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ASSOCIATION_SUBTYPES, ASSOCIATION_TYPE, ASSOCIATION_TYPE_LABELS } from "@/lib/constants";
-import type { CityEditInput } from "../schemas/city-schema";
 
 const ASSOCIATION_TYPE_OPTIONS = [
   ASSOCIATION_TYPE.agriculturalCredit,
   ASSOCIATION_TYPE.agriculturalReform,
 ] as const;
 
-interface AssociationTypeFieldsProps {
-  control: Control<CityEditInput>;
-  errors: FieldErrors<CityEditInput>;
-  associationType: CityEditInput["associationType"];
-  setValue: UseFormSetValue<CityEditInput>;
+/** Field shape shared by CityFormInput (create) and CityEditInput (edit) — both schemas match this. */
+interface AssociationTypeFormValues {
+  associationType?: string;
+  associationSubtype?: string;
 }
 
-/** The type <Select> + conditional subtype <Select> pair, extracted so EditCityDialog stays readable. */
-export function AssociationTypeFields({
+interface AssociationTypeFieldsProps<T extends AssociationTypeFormValues> {
+  control: Control<T>;
+  errors: FieldErrors<T>;
+  associationType: T["associationType"];
+  setValue: UseFormSetValue<T>;
+}
+
+/**
+ * The type <Select> + conditional subtype <Select> pair, shared by the create and edit city
+ * dialogs so this logic (and the Arabic labels/values) lives in exactly one place.
+ */
+export function AssociationTypeFields<T extends AssociationTypeFormValues>({
   control,
   errors,
   associationType,
   setValue,
-}: AssociationTypeFieldsProps) {
-  const subtypeOptions = associationType ? ASSOCIATION_SUBTYPES[associationType] : [];
+}: AssociationTypeFieldsProps<T>) {
+  const subtypeOptions =
+    associationType && associationType in ASSOCIATION_SUBTYPES
+      ? ASSOCIATION_SUBTYPES[associationType as keyof typeof ASSOCIATION_SUBTYPES]
+      : [];
 
   return (
     <>
@@ -31,13 +42,13 @@ export function AssociationTypeFields({
         <Label>نوع الجمعية</Label>
         <Controller
           control={control}
-          name="associationType"
+          name={"associationType" as Path<T>}
           render={({ field }) => (
             <Select
-              value={field.value || undefined}
+              value={(field.value as string) || undefined}
               onValueChange={(value) => {
                 field.onChange(value);
-                setValue("associationSubtype", "");
+                setValue("associationSubtype" as Path<T>, "" as never);
               }}
             >
               <SelectTrigger className="w-full" aria-label="نوع الجمعية">
@@ -61,9 +72,9 @@ export function AssociationTypeFields({
           </Label>
           <Controller
             control={control}
-            name="associationSubtype"
+            name={"associationSubtype" as Path<T>}
             render={({ field }) => (
-              <Select value={field.value || undefined} onValueChange={field.onChange}>
+              <Select value={(field.value as string) || undefined} onValueChange={field.onChange}>
                 <SelectTrigger className="w-full" aria-label="النوع الفرعي">
                   <SelectValue placeholder="غير محدد" />
                 </SelectTrigger>
@@ -78,7 +89,9 @@ export function AssociationTypeFields({
             )}
           />
           {errors.associationSubtype ? (
-            <p className="text-sm text-destructive">{errors.associationSubtype.message}</p>
+            <p className="text-sm text-destructive">
+              {(errors.associationSubtype as { message?: string }).message}
+            </p>
           ) : null}
         </div>
       ) : null}

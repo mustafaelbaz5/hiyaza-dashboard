@@ -18,6 +18,8 @@ export const previewResponseSchema = z.object({
     skippedSheets: z.array(skippedSheetSchema),
     detectedAssociationName: z.string().nullable(),
     detectedBasins: z.array(z.string()),
+    detectedAssociationType: z.enum(["agricultural_credit", "agricultural_reform"]).nullable(),
+    detectedAssociationTypeRaw: z.string().nullable(),
     diff: z.object({
       newCount: z.number(),
       changedCount: z.number(),

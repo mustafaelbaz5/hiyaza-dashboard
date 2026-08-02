@@ -18,6 +18,7 @@ import {
 import { Plus } from "lucide-react";
 import { cityFormSchema, type CityFormInput } from "../schemas/city-schema";
 import { useCreateCity } from "../hooks/use-city-mutations";
+import { AssociationTypeFields } from "./association-type-fields";
 import { useState } from "react";
 
 /** Create-city dialog, opened from the cities list PageHeader action. */
@@ -28,18 +29,30 @@ export function CityFormDialog() {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
+    control,
     formState: { errors },
   } = useForm<CityFormInput>({ resolver: zodResolver(cityFormSchema) });
 
+  const associationType = watch("associationType");
+
   function onSubmit(values: CityFormInput) {
-    createCity.mutate(values, {
-      onSuccess: () => {
-        toast.success("تم إنشاء الجمعية بنجاح");
-        reset();
-        setOpen(false);
+    createCity.mutate(
+      {
+        ...values,
+        associationType: values.associationType || null,
+        associationSubtype: values.associationSubtype || null,
       },
-      onError: () => toast.error("تعذر إنشاء الجمعية"),
-    });
+      {
+        onSuccess: () => {
+          toast.success("تم إنشاء الجمعية بنجاح");
+          reset();
+          setOpen(false);
+        },
+        onError: () => toast.error("تعذر إنشاء الجمعية"),
+      },
+    );
   }
 
   return (
@@ -69,6 +82,12 @@ export function CityFormDialog() {
             <Label htmlFor="directorate">المديرية</Label>
             <Input id="directorate" {...register("directorate")} />
           </div>
+          <AssociationTypeFields
+            control={control}
+            errors={errors}
+            associationType={associationType}
+            setValue={setValue}
+          />
           <DialogFooter>
             <Button type="submit" disabled={createCity.isPending}>
               {createCity.isPending ? "جاري الإنشاء..." : "إنشاء"}

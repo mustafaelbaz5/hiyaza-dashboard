@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test.describe("Phase 0 — Foundation", () => {
   test("unauthenticated root route redirects to /login (auth guard active)", async ({ page }) => {
@@ -17,7 +17,7 @@ test.describe("Phase 0 — Foundation", () => {
 
   test("login page is reachable and renders the form shell", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.getByText("لوحة تحكم هيازة فايندر")).toBeVisible();
+    await expect(page.getByText("لوحة تحكم حيازة")).toBeVisible();
     await expect(page.getByLabel("البريد الإلكتروني")).toBeVisible();
     await expect(page.getByLabel("كلمة المرور")).toBeVisible();
   });
