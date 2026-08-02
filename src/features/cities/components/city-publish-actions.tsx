@@ -1,6 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
+import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSetCityStatus } from "../hooks/use-city-mutations";
 import { DeleteCityDialog } from "./delete-city-dialog";
@@ -31,9 +32,20 @@ export function CityPublishActions({ city }: { city: City }) {
     });
   }
 
+  function unarchive() {
+    setStatus.mutate("draft", {
+      onSuccess: () => toast.success("تم استعادة الجمعية كمسودة"),
+      onError: () => toast.error("تعذر استعادة الجمعية"),
+    });
+  }
+
   if (city.status === "archived") {
     return (
       <div className="flex items-center gap-2">
+        <Button size="sm" variant="outline" onClick={unarchive} disabled={setStatus.isPending}>
+          <RotateCcw />
+          استعادة
+        </Button>
         <DeleteCityDialog city={city} redirectOnSuccess />
       </div>
     );

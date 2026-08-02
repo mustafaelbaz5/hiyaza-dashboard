@@ -7,7 +7,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">تسجيل الدخول</CardTitle>
-          <CardDescription>لوحة تحكم هيازة فايندر</CardDescription>
+          <CardDescription>لوحة تحكم حيازة</CardDescription>
         </CardHeader>
         <CardContent>
           <LoginForm />

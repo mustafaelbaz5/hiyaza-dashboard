@@ -7,6 +7,7 @@ import { checkParcelCounts } from "@/features/import/core/check-parcel-counts";
 import { buildPreviewSummary } from "@/features/import/core/preview-summary";
 import { buildHoldingRecords } from "@/features/import/core/build-holding-records";
 import { computeDedupKey } from "@/features/import/core/dedup-key";
+import { detectAssociationType } from "@/features/import/core/detect-association-type";
 import { DEFAULT_COLUMN_MAPPING, isSkippableSheet } from "@/features/import/core/column-mapping";
 import { createClient } from "@/lib/supabase/server";
 import { TABLES } from "@/lib/constants";
@@ -78,7 +79,15 @@ export async function POST(request: Request) {
       }),
     ),
   );
-  const preview = buildPreviewSummary(valid, blank, mapped.length, skippedSheets, existingDedupKeys);
+  const detectedType = detectAssociationType(dataSheet.rows);
+  const preview = buildPreviewSummary(
+    valid,
+    blank,
+    mapped.length,
+    skippedSheets,
+    existingDedupKeys,
+    detectedType,
+  );
 
   const records = buildHoldingRecords(valid, cityId);
 

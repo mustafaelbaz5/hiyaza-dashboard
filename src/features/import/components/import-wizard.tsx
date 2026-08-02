@@ -11,6 +11,7 @@ import { useCommitImport } from "../hooks/use-commit-import";
 import type { PreviewResponse } from "../schemas/preview-response-schema";
 import type { CommitImportResult } from "../types";
 import type { HoldingInsertRecord } from "../core/build-holding-records";
+import type { AssociationType } from "@/lib/constants";
 
 /** Orchestrates upload -> preview -> [user confirms] -> commit -> result summary. */
 export function ImportWizard({ cityId }: { cityId: string }) {
@@ -18,6 +19,7 @@ export function ImportWizard({ cityId }: { cityId: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [previewData, setPreviewData] = useState<PreviewResponse | null>(null);
   const [commitResult, setCommitResult] = useState<CommitImportResult | null>(null);
+  const [confirmedType, setConfirmedType] = useState<AssociationType | null>(null);
 
   const preview = useImportPreview();
   const commit = useCommitImport();
@@ -28,7 +30,10 @@ export function ImportWizard({ cityId }: { cityId: string }) {
     preview.mutate(
       { cityId, file: selected },
       {
-        onSuccess: (data) => setPreviewData(data),
+        onSuccess: (data) => {
+          setPreviewData(data);
+          setConfirmedType(data.preview.detectedAssociationType);
+        },
         onError: (e) => toast.error(e.message),
       },
     );
@@ -44,12 +49,14 @@ export function ImportWizard({ cityId }: { cityId: string }) {
         preview: previewData.preview,
         records: previewData.records as unknown as HoldingInsertRecord[],
         mappingUsed: previewData.mappingUsed,
+        confirmedAssociationType: confirmedType,
       },
       {
         onSuccess: (result) => {
           toast.success(`تم استيراد ${result.rowsImported} صف بنجاح`);
           setFile(null);
           setPreviewData(null);
+          setConfirmedType(null);
           setCommitResult(result);
           router.refresh();
         },
@@ -64,6 +71,7 @@ export function ImportWizard({ cityId }: { cityId: string }) {
   function handleCancel() {
     setFile(null);
     setPreviewData(null);
+    setConfirmedType(null);
   }
 
   if (commitResult) {
@@ -78,6 +86,8 @@ export function ImportWizard({ cityId }: { cityId: string }) {
         onConfirm={handleConfirm}
         onCancel={handleCancel}
         isCommitting={commit.isPending}
+        confirmedType={confirmedType}
+        onConfirmedTypeChange={setConfirmedType}
       />
     );
   }

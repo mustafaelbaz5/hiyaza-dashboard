@@ -15,6 +15,8 @@ function toCity(row: CityRow): City {
     administration: row.administration,
     directorate: row.directorate,
     status: row.status,
+    associationType: row.association_type,
+    associationSubtype: row.association_subtype,
     dataVersion: row.data_version,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -75,6 +77,8 @@ export function createSupabaseCitiesRepository(
           name: input.name,
           administration: input.administration ?? null,
           directorate: input.directorate ?? null,
+          association_type: input.associationType ?? null,
+          association_subtype: input.associationSubtype ?? null,
           created_by: user?.id,
         })
         .select("*")
@@ -91,6 +95,10 @@ export function createSupabaseCitiesRepository(
           ...(input.name !== undefined && { name: input.name }),
           ...(input.administration !== undefined && { administration: input.administration }),
           ...(input.directorate !== undefined && { directorate: input.directorate }),
+          ...(input.associationType !== undefined && { association_type: input.associationType }),
+          ...(input.associationSubtype !== undefined && {
+            association_subtype: input.associationSubtype,
+          }),
         })
         .eq("id", cityId)
         .select("*")
@@ -114,6 +122,12 @@ export function createSupabaseCitiesRepository(
 
     async delete(cityId: string) {
       const { error } = await supabase.from(TABLES.cities).delete().eq("id", cityId);
+      if (error) return err(fromSupabaseError(error));
+      return ok(undefined);
+    },
+
+    async deleteCascade(cityId: string) {
+      const { error } = await supabase.rpc("delete_city_cascade", { p_city_id: cityId });
       if (error) return err(fromSupabaseError(error));
       return ok(undefined);
     },

@@ -1,16 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Building2,
-  ClipboardCheck,
-  History,
-  BarChart3,
-  Users,
-  Settings,
-} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -25,11 +14,27 @@ import {
 } from "@/components/ui/sidebar";
 import { useNotificationCounts } from "@/features/notifications/hooks/use-notification-counts";
 import { formatNumber } from "@/lib/format";
+import {
+  BarChart3,
+  Building2,
+  ClipboardCheck,
+  History,
+  LayoutDashboard,
+  Settings,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   { href: "/", label: "نظرة عامة", icon: LayoutDashboard },
   { href: "/cities", label: "المدن", icon: Building2 },
-  { href: "/review", label: "الإضافات الميدانية", icon: ClipboardCheck, badge: "pendingReviews" as const },
+  {
+    href: "/review",
+    label: "الإضافات الميدانية",
+    icon: ClipboardCheck,
+    badge: "pendingReviews" as const,
+  },
   { href: "/audit", label: "سجل النشاط", icon: History },
   { href: "/analytics", label: "التحليلات", icon: BarChart3 },
   { href: "/users", label: "المستخدمون", icon: Users },
@@ -48,7 +53,7 @@ export function AppSidebar() {
           <span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
             ه
           </span>
-          <span className="group-data-[collapsible=icon]:hidden">هيازة فايندر</span>
+          <span className="group-data-[collapsible=icon]:hidden">حيازة</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
@@ -67,7 +72,9 @@ export function AppSidebar() {
                         <span>{label}</span>
                       </Link>
                     </SidebarMenuButton>
-                    {badgeCount > 0 ? <SidebarMenuBadge>{formatNumber(badgeCount)}</SidebarMenuBadge> : null}
+                    {badgeCount > 0 ? (
+                      <SidebarMenuBadge>{formatNumber(badgeCount)}</SidebarMenuBadge>
+                    ) : null}
                   </SidebarMenuItem>
                 );
               })}

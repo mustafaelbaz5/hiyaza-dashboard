@@ -1,6 +1,8 @@
 import type { MappedHoldingRow } from "./map-rows";
 import type { BlankRow } from "./validate-rows";
 import { computeDedupKey } from "./dedup-key";
+import type { DetectedAssociationType } from "./detect-association-type";
+import type { AssociationType } from "@/lib/constants";
 
 export interface SkippedSheet {
   name: string;
@@ -21,6 +23,8 @@ export interface PreviewSummary {
   skippedSheets: SkippedSheet[];
   detectedAssociationName: string | null;
   detectedBasins: string[];
+  detectedAssociationType: AssociationType | null;
+  detectedAssociationTypeRaw: string | null;
   diff: ImportDiff;
 }
 
@@ -37,6 +41,7 @@ export function buildPreviewSummary(
   rowsFound: number,
   skippedSheets: SkippedSheet[],
   existingDedupKeys: Set<string>,
+  detectedType: DetectedAssociationType = { type: null, rawLabel: null },
 ): PreviewSummary {
   const associationCounts = new Map<string, number>();
   const basins = new Set<string>();
@@ -69,6 +74,8 @@ export function buildPreviewSummary(
     skippedSheets,
     detectedAssociationName,
     detectedBasins: [...basins].sort(),
+    detectedAssociationType: detectedType.type,
+    detectedAssociationTypeRaw: detectedType.rawLabel,
     diff: { newCount, changedCount, removedCount },
   };
 }

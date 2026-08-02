@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Tajawal } from "next/font/google";
-import { Providers } from "./providers";
 import "./globals.css";
+import { Providers } from "./providers";
 
 const tajawal = Tajawal({
   variable: "--font-sans",
@@ -10,8 +10,8 @@ const tajawal = Tajawal({
 });
 
 export const metadata: Metadata = {
-  title: "لوحة تحكم هيازة فايندر",
-  description: "لوحة التحكم الإدارية لنظام هيازة فايندر",
+  title: "لوحة تحكم حيازة",
+  description: "لوحة التحكم الإدارية لنظام حيازة",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
