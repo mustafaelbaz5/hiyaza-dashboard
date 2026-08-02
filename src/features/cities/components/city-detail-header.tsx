@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/shared/page-header";
 import { CityStatusBadge } from "./city-status-badge";
+import { AssociationTypeBadge } from "./association-type-badge";
 import { CityPublishActions } from "./city-publish-actions";
 import { useCity } from "../hooks/use-city";
 
@@ -32,6 +33,7 @@ export function CityDetailHeader({ cityId }: { cityId: string }) {
       action={
         <div className="flex items-center gap-2">
           <CityStatusBadge status={city.status} />
+          <AssociationTypeBadge type={city.associationType} subtype={city.associationSubtype} />
           <CityPublishActions city={city} />
         </div>
       }

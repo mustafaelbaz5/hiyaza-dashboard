@@ -4,7 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { createSupabaseCitiesRepository } from "../api/supabase-cities-repository";
 import { queryKeys } from "@/lib/query-keys";
-import type { CityStatus, CreateCityInput, UpdateCityInput } from "../types";
+import type { AppError } from "@/lib/errors";
+import type { City, CityStatus, CreateCityInput, UpdateCityInput } from "../types";
 
 /** Creates a city; invalidates the list so it appears immediately. */
 export function useCreateCity() {
@@ -25,7 +26,7 @@ export function useCreateCity() {
 /** Edits a city's identifying fields. */
 export function useUpdateCity(cityId: string) {
   const queryClient = useQueryClient();
-  return useMutation({
+  return useMutation<City, AppError, UpdateCityInput>({
     mutationFn: async (input: UpdateCityInput) => {
       const repo = createSupabaseCitiesRepository(createClient());
       const result = await repo.update(cityId, input);
@@ -67,6 +68,25 @@ export function useDeleteCity() {
     mutationFn: async (cityId: string) => {
       const repo = createSupabaseCitiesRepository(createClient());
       const result = await repo.delete(cityId);
+      if (!result.ok) throw result.error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.cities.all });
+    },
+  });
+}
+
+/**
+ * Admin-only, irreversible: permanently deletes a city and every holding/edit/import batch under
+ * it, via the delete_city_cascade RPC. Unlike useDeleteCity, this always succeeds regardless of
+ * how much data the city has.
+ */
+export function useDeleteCityCascade() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (cityId: string) => {
+      const repo = createSupabaseCitiesRepository(createClient());
+      const result = await repo.deleteCascade(cityId);
       if (!result.ok) throw result.error;
     },
     onSuccess: () => {

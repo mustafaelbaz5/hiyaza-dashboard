@@ -8,6 +8,7 @@ export const TABLES = {
   addedHoldings: "added_holdings",
   importBatches: "import_batches",
   qualitySnapshots: "quality_snapshots",
+  adminActions: "admin_actions",
 } as const;
 
 export const STORAGE_BUCKETS = {
@@ -44,3 +45,26 @@ export const REVIEW_STATUS = {
   approved: "approved",
   rejected: "rejected",
 } as const;
+
+/**
+ * Single source of truth for association type/subtype labels — the exact Arabic literals here
+ * must match the `cities_subtype_valid` check constraint (supabase/migrations/
+ * 20260801200000_city_association_type.sql) byte-for-byte. Copy from here into SQL, never
+ * retype independently (Arabic strings are prone to invisible character-variant mismatches).
+ */
+export const ASSOCIATION_TYPE = {
+  agriculturalCredit: "agricultural_credit",
+  agriculturalReform: "agricultural_reform",
+} as const;
+
+export type AssociationType = (typeof ASSOCIATION_TYPE)[keyof typeof ASSOCIATION_TYPE];
+
+export const ASSOCIATION_TYPE_LABELS: Record<AssociationType, string> = {
+  agricultural_credit: "الائتمان الزراعي",
+  agricultural_reform: "الإصلاح الزراعي",
+};
+
+export const ASSOCIATION_SUBTYPES: Record<AssociationType, readonly string[]> = {
+  agricultural_credit: ["ملك", "اوقاف"],
+  agricultural_reform: ["إصلاح مُملك", "إصلاح اشتراكي", "إصلاح قانون ثلاثة"],
+};

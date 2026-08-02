@@ -7,7 +7,11 @@ import { toast } from "sonner";
 import { DataTable } from "@/components/shared/data-table";
 import { Button } from "@/components/ui/button";
 import { CityStatusBadge } from "./city-status-badge";
+import { AssociationTypeBadge } from "./association-type-badge";
 import { DeleteCityDialog } from "./delete-city-dialog";
+import { CascadeDeleteCityDialog } from "./cascade-delete-city-dialog";
+import { EditCityDialog } from "./edit-city-dialog";
+import { UnarchiveCityAction } from "./unarchive-city-action";
 import { useCities } from "../hooks/use-cities";
 import { useSetCityStatus } from "../hooks/use-city-mutations";
 import { formatDate, formatNumber } from "@/lib/format";
@@ -47,6 +51,16 @@ const columns: ColumnDef<CityWithStats>[] = [
   { accessorKey: "administration", header: "الإدارة", cell: ({ row }) => row.original.administration ?? "—" },
   { accessorKey: "directorate", header: "المديرية", cell: ({ row }) => row.original.directorate ?? "—" },
   {
+    id: "associationType",
+    header: "نوع الجمعية",
+    cell: ({ row }) => (
+      <AssociationTypeBadge
+        type={row.original.associationType}
+        subtype={row.original.associationSubtype}
+      />
+    ),
+  },
+  {
     accessorKey: "holdingsCount",
     header: "عدد الحيازات",
     cell: ({ row }) => formatNumber(row.original.holdingsCount),
@@ -66,8 +80,11 @@ const columns: ColumnDef<CityWithStats>[] = [
     header: "",
     cell: ({ row }) => (
       <div className="flex justify-end gap-1">
+        <EditCityDialog city={row.original} />
+        <UnarchiveCityAction city={row.original} />
         <ArchiveAction city={row.original} />
         <DeleteCityDialog city={row.original} />
+        <CascadeDeleteCityDialog city={row.original} />
       </div>
     ),
   },
