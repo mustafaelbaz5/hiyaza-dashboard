@@ -1,14 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { createSupabaseExportRepository } from "../api/supabase-export-repository";
-import { buildUnifiedDataset } from "../core/build-unified-dataset";
-import { mapToExcelRow, buildExcelHeader } from "../core/excel-mapper";
+import { buildUnifiedDataset, type UnifiedDatasetRow } from "../core/build-unified-dataset";
+import { mapToExcelRow, buildExcelHeader, type ExcelExportRow } from "../core/excel-mapper";
 import { ExportButton } from "../components/export-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import type { UnifiedExportRow } from "../types";
+
+interface SampleRow {
+  raw: UnifiedExportRow;
+  dataset: UnifiedDatasetRow;
+  mapped: ExcelExportRow;
+}
 
 /** Development page for manual export testing.
  * Allows verification of:
@@ -21,7 +27,7 @@ export function ExportTestPage() {
   const [cityId, setCityId] = useState<string>("");
   const [testResults, setTestResults] = useState<{
     totalRows: number;
-    sampleRow: unknown;
+    sampleRow: SampleRow;
     columnCount: number;
     columnNames: string[];
   } | null>(null);
@@ -46,14 +52,15 @@ export function ExportTestPage() {
 
       const dataset = buildUnifiedDataset(rows);
       const header = buildExcelHeader();
+      const firstRawRow = rows[0];
       const firstRow = dataset[0];
       const firstMapped = firstRow ? mapToExcelRow(firstRow) : null;
 
-      if (firstRow && firstMapped) {
+      if (firstRawRow && firstRow && firstMapped) {
         setTestResults({
           totalRows: rows.length,
           sampleRow: {
-            raw: rows[0],
+            raw: firstRawRow,
             dataset: firstRow,
             mapped: firstMapped,
           },
@@ -127,11 +134,7 @@ export function ExportTestPage() {
                   Raw UnifiedExportRow (before mapping)
                 </summary>
                 <pre className="mt-2 text-xs overflow-x-auto">
-                  {JSON.stringify(
-                    (testResults.sampleRow as any)?.raw,
-                    null,
-                    2
-                  ).slice(0, 500)}...
+                  {JSON.stringify(testResults.sampleRow.raw, null, 2).slice(0, 500)}...
                 </pre>
               </details>
 
@@ -140,11 +143,7 @@ export function ExportTestPage() {
                   UnifiedDatasetRow (after dataset builder)
                 </summary>
                 <pre className="mt-2 text-xs overflow-x-auto">
-                  {JSON.stringify(
-                    (testResults.sampleRow as any)?.dataset,
-                    null,
-                    2
-                  ).slice(0, 500)}...
+                  {JSON.stringify(testResults.sampleRow.dataset, null, 2).slice(0, 500)}...
                 </pre>
               </details>
 
@@ -153,11 +152,7 @@ export function ExportTestPage() {
                   ExcelExportRow (after mapper — 25 columns)
                 </summary>
                 <pre className="mt-2 text-xs overflow-x-auto">
-                  {JSON.stringify(
-                    (testResults.sampleRow as any)?.mapped,
-                    null,
-                    2
-                  )}
+                  {JSON.stringify(testResults.sampleRow.mapped, null, 2)}
                 </pre>
               </details>
             </div>
@@ -175,7 +170,7 @@ export function ExportTestPage() {
                 </li>
                 <li className="flex items-center gap-2 text-gray-600">
                   <span>→</span>
-                  Click "تصدير إلى Excel" to download full export
+                  Click &quot;تصدير إلى Excel&quot; to download full export
                 </li>
                 <li className="flex items-center gap-2 text-gray-600">
                   <span>→</span>
