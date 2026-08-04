@@ -701,6 +701,7 @@ export type Database = {
           soil_type: string | null
           total_sqm: number | null
           unified_number: string | null
+          usage_type: string | null
         }
         Relationships: [
           {
