@@ -8,6 +8,7 @@ import { ErrorState } from "@/components/shared/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuditFeed } from "../hooks/use-audit-feed";
 import { AuditEntrySummary } from "./audit-entry-summary";
+import { AuditExportButton } from "./audit-export-button";
 import { HoldingEditDiffView } from "./holding-edit-diff-view";
 import { formatDate } from "@/lib/format";
 import type { AuditFilters } from "../types";
@@ -37,7 +38,11 @@ export function AuditFeed({ filters }: { filters: AuditFilters }) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <AuditExportButton entries={entries} />
+      </div>
+      <div className="space-y-2">
       {entries.map((entry) => {
         const key = `${entry.entityType}-${entry.entityId}`;
         const isExpanded = expandedId === key;
@@ -71,6 +76,7 @@ export function AuditFeed({ filters }: { filters: AuditFilters }) {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

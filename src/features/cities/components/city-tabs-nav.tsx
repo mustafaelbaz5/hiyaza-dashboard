@@ -9,6 +9,7 @@ const TABS = [
   { segment: "holdings", label: "الحيازات" },
   { segment: "import", label: "الاستيراد" },
   { segment: "quality", label: "الجودة" },
+  { segment: "activity", label: "النشاط" },
 ] as const;
 
 /** Tab navigation across the city detail sub-routes — each tab is a real route, not client state. */
