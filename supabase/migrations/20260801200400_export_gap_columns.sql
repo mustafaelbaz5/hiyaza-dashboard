@@ -8,13 +8,13 @@
 -- of added_holdings onto holdings.
 
 alter table holdings
-  add column soil_type text,
-  add column growth_stages text,
-  add column holder_name_farmer_card text,
-  add column owner_name_farmer_card text;
+  add column if not exists soil_type text,
+  add column if not exists growth_stages text,
+  add column if not exists holder_name_farmer_card text,
+  add column if not exists owner_name_farmer_card text;
 
 alter table added_holdings
-  add column soil_type text,
-  add column growth_stages text,
-  add column holder_name_farmer_card text,
-  add column owner_name_farmer_card text;
+  add column if not exists soil_type text,
+  add column if not exists growth_stages text,
+  add column if not exists holder_name_farmer_card text,
+  add column if not exists owner_name_farmer_card text;

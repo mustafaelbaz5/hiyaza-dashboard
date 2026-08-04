@@ -15,8 +15,8 @@
 -- person_id — never grouped with any other row, since neither value reliably identifies one
 -- real individual.
 
-alter table holdings add column person_id uuid;
-alter table added_holdings add column person_id uuid;
+alter table holdings add column if not exists person_id uuid;
+alter table added_holdings add column if not exists person_id uuid;
 
 -- Backfill holdings: one shared person_id per distinct real national_id.
 with real_people as (
@@ -78,6 +78,7 @@ begin
 end;
 $$;
 
+drop trigger if exists added_holdings_assign_person_id on added_holdings;
 create trigger added_holdings_assign_person_id
   before insert on added_holdings
   for each row execute function assign_person_id();

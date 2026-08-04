@@ -41,6 +41,7 @@ begin
 end;
 $$;
 
+drop trigger if exists holdings_assign_person_id on holdings;
 create trigger holdings_assign_person_id
   before insert on holdings
   for each row execute function assign_person_id_holdings();

@@ -7,7 +7,6 @@
 -- Recreates the view with total_feddan restored, keeping is_stale filtering consistent with every
 -- other analytics view in this file.
 
-drop materialized view if exists city_top_holders;
 drop view if exists city_top_holders;
 
 create view city_top_holders as
