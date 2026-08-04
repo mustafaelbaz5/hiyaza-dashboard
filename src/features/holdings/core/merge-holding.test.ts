@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { mergeHolding, buildEditPayload, type HoldingBaseRow, type MergedHolding } from "./merge-holding";
+import {
+  mergeHolding,
+  buildEditPayload,
+  normalizeEditPayload,
+  type HoldingBaseRow,
+  type MergedHolding,
+} from "./merge-holding";
 
 function makeBase(overrides: Partial<HoldingBaseRow> = {}): HoldingBaseRow {
   return {
@@ -80,5 +86,62 @@ describe("buildEditPayload", () => {
     expect(payload.holder_name).toBe("اسم محدث");
     expect(payload.national_id).toBe(base.national_id);
     expect(payload.feddan).toBe(base.feddan);
+  });
+});
+
+describe("normalizeEditPayload", () => {
+  it("translates a real Flutter-shaped camelCase payload into snake_case EditableField keys", () => {
+    // Matches the actual shape of holding_edits.payload as written by the Flutter app —
+    // this is the exact bug this function exists to fix (see DASHBOARD_ID_ALIGNMENT.md).
+    const rawPayload = {
+      holderName: "محمد احمد",
+      nationalId: "29510251202211",
+      landNumber: "12850776",
+      pageNumber: "1",
+      basinName: "الزيانه",
+      basinCode: "-1",
+      administration: "اجا",
+      directorate: "الدقهليه",
+      feddan: 0,
+      qirat: 8,
+      sahm: 12,
+      totalSqm: 1487.72,
+      // Flutter-only fields with no EditableField counterpart yet — must be ignored, not error.
+      cropType: "ارز",
+      usageType: "زراعة",
+      isDelegate: false,
+      notes: null,
+    };
+
+    const normalized = normalizeEditPayload(rawPayload);
+
+    expect(normalized).not.toBeNull();
+    expect(normalized!.holder_name).toBe("محمد احمد");
+    expect(normalized!.national_id).toBe("29510251202211");
+    expect(normalized!.basin_code).toBe("-1");
+    expect(normalized!.feddan).toBe(0);
+    expect(normalized!.sahm).toBe(12);
+  });
+
+  it("returns null for a null payload", () => {
+    expect(normalizeEditPayload(null)).toBeNull();
+  });
+
+  it("only sets keys actually present in the raw payload", () => {
+    const normalized = normalizeEditPayload({ holderName: "احمد" });
+    expect(normalized).toEqual({ holder_name: "احمد" });
+    expect(normalized!.national_id).toBeUndefined();
+  });
+
+  it("end-to-end: a real Flutter edit payload, once normalized, correctly overlays onto mergeHolding", () => {
+    const base = makeBase();
+    const rawFlutterPayload = { holderName: "اسم جديد بعد التعديل", feddan: 5 };
+
+    const normalized = normalizeEditPayload(rawFlutterPayload);
+    const merged = mergeHolding(base, normalized);
+
+    expect(merged.holder_name).toBe("اسم جديد بعد التعديل");
+    expect(merged.feddan).toBe(5);
+    expect(merged.isEdited).toBe(true);
   });
 });

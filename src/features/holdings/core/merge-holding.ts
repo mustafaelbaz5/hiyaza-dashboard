@@ -1,4 +1,4 @@
-import { EDITABLE_FIELDS, type EditableField } from "./editable-fields";
+import { EDITABLE_FIELDS, EDIT_PAYLOAD_KEY_MAP, type EditableField } from "./editable-fields";
 
 export interface HoldingBaseRow {
   id: string;
@@ -27,6 +27,25 @@ export interface HoldingBaseRow {
 }
 
 export type EditPayload = Partial<Record<EditableField, string | number | null>>;
+
+/**
+ * Translates a raw `holding_edits.payload` row (camelCase, written by the Flutter app) into an
+ * EditPayload keyed by this dashboard's snake_case EditableField names, via EDIT_PAYLOAD_KEY_MAP.
+ * Every reader of a raw payload — mergeHolding's caller, the audit diff view — must go through
+ * this first; reading the raw payload directly with snake_case keys finds nothing.
+ */
+export function normalizeEditPayload(rawPayload: Record<string, unknown> | null): EditPayload | null {
+  if (!rawPayload) return null;
+
+  const normalized: EditPayload = {};
+  for (const field of EDITABLE_FIELDS) {
+    const rawKey = EDIT_PAYLOAD_KEY_MAP[field];
+    if (rawKey in rawPayload) {
+      normalized[field] = rawPayload[rawKey] as string | number | null;
+    }
+  }
+  return normalized;
+}
 
 export interface MergedHolding extends HoldingBaseRow {
   isEdited: boolean;

@@ -3,6 +3,7 @@ import type { Database } from "@/lib/supabase/database.types";
 import { ok, err } from "@/lib/result";
 import { fromSupabaseError } from "@/lib/errors";
 import { EDITABLE_FIELDS } from "@/features/holdings/core/editable-fields";
+import { normalizeEditPayload } from "@/features/holdings/core/merge-holding";
 import type { AuditEntry, AuditEntryWithUser, AuditFilters, AuditRepository, HoldingEditDiff } from "../types";
 
 const FEED_LIMIT = 200;
@@ -73,8 +74,11 @@ export function createSupabaseAuditRepository(
       const target = allEdits![targetIndex]!;
       const previous = targetIndex > 0 ? allEdits![targetIndex - 1] : null;
 
-      const targetPayload = target.payload as Record<string, unknown>;
-      const previousPayload = (previous?.payload as Record<string, unknown> | undefined) ?? (base as unknown as Record<string, unknown>);
+      const targetPayload =
+        normalizeEditPayload(target.payload as Record<string, unknown>) ?? {};
+      const previousPayload = previous
+        ? (normalizeEditPayload(previous.payload as Record<string, unknown>) ?? {})
+        : (base as unknown as Record<string, unknown>);
 
       const diffs: HoldingEditDiff[] = [];
       for (const field of EDITABLE_FIELDS) {
