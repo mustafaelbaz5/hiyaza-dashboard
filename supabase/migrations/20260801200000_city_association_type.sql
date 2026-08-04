@@ -9,18 +9,30 @@
 -- Both columns nullable: legacy cities have no type until an admin sets one (or an import detects
 -- it — see the import feature's detectAssociationType, wired in a later migration/PR).
 
-create type association_type as enum ('agricultural_credit', 'agricultural_reform');
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'association_type') then
+    create type association_type as enum ('agricultural_credit', 'agricultural_reform');
+  end if;
+end $$;
 
 alter table cities
-  add column association_type association_type,
-  add column association_subtype text;
+  add column if not exists association_type association_type,
+  add column if not exists association_subtype text;
 
-alter table cities add constraint cities_subtype_valid check (
-  association_subtype is null
-  or (association_type = 'agricultural_credit' and association_subtype in ('ملك', 'اوقاف'))
-  or (association_type = 'agricultural_reform' and association_subtype in
-      ('إصلاح مُملك', 'إصلاح اشتراكي', 'إصلاح قانون ثلاثة'))
-);
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'cities_subtype_valid'
+  ) then
+    alter table cities add constraint cities_subtype_valid check (
+      association_subtype is null
+      or (association_type = 'agricultural_credit' and association_subtype in ('ملك', 'اوقاف'))
+      or (association_type = 'agricultural_reform' and association_subtype in
+          ('إصلاح مُملك', 'إصلاح اشتراكي', 'إصلاح قانون ثلاثة'))
+    );
+  end if;
+end $$;
 
 comment on column cities.association_type is
   'Top-level association classification: agricultural_credit (الائتمان الزراعي) or agricultural_reform (الإصلاح الزراعي).';

@@ -1,0 +1,1 @@
+-- Placeholder: this migration was applied directly to the remote database (e.g. via Supabase Studio) and has no corresponding tracked SQL file in this repo. Created to keep local migration history in sync with the remote schema_migrations table — do not delete.

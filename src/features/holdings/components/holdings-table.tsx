@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { ColumnDef, SortingState, RowSelectionState } from "@tanstack/react-table";
-import { Download, PencilLine } from "lucide-react";
+import { PencilLine } from "lucide-react";
 import { DataTable } from "@/components/shared/data-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { useHoldings } from "../hooks/use-holdings";
 import { useBasins } from "../hooks/use-basins";
-import { useExportHoldings } from "../hooks/use-export-holdings";
+import { ExportDialog } from "@/features/export/components/export-dialog";
 import { InlineEditCell } from "./inline-edit-cell";
 import { BulkEditDialog } from "./bulk-edit-dialog";
 import type { MergedHolding } from "../core/merge-holding";
@@ -74,7 +74,6 @@ export function HoldingsTable({ cityId }: { cityId: string }) {
     pageSize: PAGE_SIZE,
   });
   const { data: basins } = useBasins(cityId);
-  const exportHoldings = useExportHoldings(cityId);
 
   const columns = useMemo(() => buildColumns(cityId), [cityId]);
   const rows = useMemo(() => data?.rows ?? [], [data]);
@@ -124,15 +123,7 @@ export function HoldingsTable({ cityId }: { cityId: string }) {
           <PencilLine />
           تعديل جماعي ({selectedIds.length})
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => exportHoldings.mutate(filters)}
-          disabled={exportHoldings.isPending}
-        >
-          <Download />
-          تصدير
-        </Button>
+        <ExportDialog cityId={cityId} variant="outline" size="sm" label="تصدير" />
       </div>
 
       <DataTable

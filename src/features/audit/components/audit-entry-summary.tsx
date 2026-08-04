@@ -5,6 +5,8 @@ const ENTITY_LABELS: Record<AuditEntryWithUser["entityType"], string> = {
   import: "استيراد",
   holding_edit: "تعديل حيازة",
   added_holding: "سجل ميداني",
+  city_management: "إدارة جمعية",
+  user_management: "إدارة مستخدم",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -30,6 +32,16 @@ export function AuditEntrySummary({ entry }: { entry: AuditEntryWithUser }) {
         <span>
           {String(d.holder_name)} — {STATUS_LABELS[String(d.status)] ?? String(d.status)}
           {d.rejection_reason ? ` (${d.rejection_reason})` : ""}
+        </span>
+      ) : null}
+      {entry.entityType === "city_management" ? (
+        <span>
+          {String(d.action_type)}: {String(d.entity_name)}
+        </span>
+      ) : null}
+      {entry.entityType === "user_management" ? (
+        <span>
+          {String(d.action_type)}: {String(d.entity_name)}
         </span>
       ) : null}
     </div>

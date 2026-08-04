@@ -3,7 +3,13 @@ import type { Database } from "@/lib/supabase/database.types";
 import { ok, err } from "@/lib/result";
 import { fromSupabaseError } from "@/lib/errors";
 import { TABLES } from "@/lib/constants";
-import { mergeHolding, buildEditPayload, type EditPayload, type HoldingBaseRow } from "../core/merge-holding";
+import {
+  mergeHolding,
+  buildEditPayload,
+  normalizeEditPayload,
+  type EditPayload,
+  type HoldingBaseRow,
+} from "../core/merge-holding";
 import type {
   ApplyEditInput,
   BulkApplyFieldInput,
@@ -25,7 +31,10 @@ async function fetchLatestEdits(
 
   const map = new Map<string, EditPayload>();
   for (const row of data ?? []) {
-    if (row.holding_id) map.set(row.holding_id, row.payload as EditPayload);
+    const normalized = row.holding_id
+      ? normalizeEditPayload(row.payload as Record<string, unknown>)
+      : null;
+    if (row.holding_id && normalized) map.set(row.holding_id, normalized);
   }
   return map;
 }

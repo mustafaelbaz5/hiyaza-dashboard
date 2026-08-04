@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.15"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       added_holdings: {
@@ -32,7 +57,9 @@ export type Database = {
           crop_type: string | null
           directorate: string | null
           feddan: number
+          growth_stages: string | null
           holder_name: string
+          holder_name_farmer_card: string | null
           holding_id_number: string | null
           id: string
           is_delegate: boolean
@@ -41,14 +68,18 @@ export type Database = {
           national_id: string | null
           notes: string | null
           owner_name: string | null
+          owner_name_farmer_card: string | null
           page_number: string | null
           parent_holding_id: string | null
+          person_id: string | null
           promoted_holding_id: string | null
           qirat: number
+          reform_type: string | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           sahm: number
+          soil_type: string | null
           status: Database["public"]["Enums"]["record_status"]
           total_sqm: number | null
           unified_number: string | null
@@ -72,23 +103,29 @@ export type Database = {
           crop_type?: string | null
           directorate?: string | null
           feddan?: number
+          growth_stages?: string | null
           holder_name: string
+          holder_name_farmer_card?: string | null
           holding_id_number?: string | null
-          id?: string
+          id: string
           is_delegate?: boolean
           is_inheritance?: boolean
           land_number?: string | null
           national_id?: string | null
           notes?: string | null
           owner_name?: string | null
+          owner_name_farmer_card?: string | null
           page_number?: string | null
           parent_holding_id?: string | null
+          person_id?: string | null
           promoted_holding_id?: string | null
           qirat?: number
+          reform_type?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           sahm?: number
+          soil_type?: string | null
           status?: Database["public"]["Enums"]["record_status"]
           total_sqm?: number | null
           unified_number?: string | null
@@ -112,7 +149,9 @@ export type Database = {
           crop_type?: string | null
           directorate?: string | null
           feddan?: number
+          growth_stages?: string | null
           holder_name?: string
+          holder_name_farmer_card?: string | null
           holding_id_number?: string | null
           id?: string
           is_delegate?: boolean
@@ -121,14 +160,18 @@ export type Database = {
           national_id?: string | null
           notes?: string | null
           owner_name?: string | null
+          owner_name_farmer_card?: string | null
           page_number?: string | null
           parent_holding_id?: string | null
+          person_id?: string | null
           promoted_holding_id?: string | null
           qirat?: number
+          reform_type?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           sahm?: number
+          soil_type?: string | null
           status?: Database["public"]["Enums"]["record_status"]
           total_sqm?: number | null
           unified_number?: string | null
@@ -165,10 +208,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "added_holdings_parent_holding_id_fkey"
+            columns: ["parent_holding_id"]
+            isOneToOne: false
+            referencedRelation: "holdings_with_merged_edits"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "added_holdings_promoted_holding_id_fkey"
             columns: ["promoted_holding_id"]
             isOneToOne: false
             referencedRelation: "holdings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "added_holdings_promoted_holding_id_fkey"
+            columns: ["promoted_holding_id"]
+            isOneToOne: false
+            referencedRelation: "holdings_with_merged_edits"
             referencedColumns: ["id"]
           },
           {
@@ -239,39 +296,57 @@ export type Database = {
         Row: {
           administration: string | null
           association_subtype: string | null
-          association_type: Database["public"]["Enums"]["association_type"] | null
+          association_type:
+            | Database["public"]["Enums"]["association_type"]
+            | null
+          classification:
+            | Database["public"]["Enums"]["city_classification"]
+            | null
           created_at: string
           created_by: string | null
           data_version: number
           directorate: string | null
           id: string
           name: string
+          short_code: string | null
           status: Database["public"]["Enums"]["city_status"]
           updated_at: string
         }
         Insert: {
           administration?: string | null
           association_subtype?: string | null
-          association_type?: Database["public"]["Enums"]["association_type"] | null
+          association_type?:
+            | Database["public"]["Enums"]["association_type"]
+            | null
+          classification?:
+            | Database["public"]["Enums"]["city_classification"]
+            | null
           created_at?: string
           created_by?: string | null
           data_version?: number
           directorate?: string | null
           id?: string
           name: string
+          short_code?: string | null
           status?: Database["public"]["Enums"]["city_status"]
           updated_at?: string
         }
         Update: {
           administration?: string | null
           association_subtype?: string | null
-          association_type?: Database["public"]["Enums"]["association_type"] | null
+          association_type?:
+            | Database["public"]["Enums"]["association_type"]
+            | null
+          classification?:
+            | Database["public"]["Enums"]["city_classification"]
+            | null
           created_at?: string
           created_by?: string | null
           data_version?: number
           directorate?: string | null
           id?: string
           name?: string
+          short_code?: string | null
           status?: Database["public"]["Enums"]["city_status"]
           updated_at?: string
         }
@@ -348,13 +423,6 @@ export type Database = {
             referencedRelation: "team_activity"
             referencedColumns: ["user_id"]
           },
-          {
-            foreignKeyName: "holding_edits_holding_id_fkey"
-            columns: ["holding_id"]
-            isOneToOne: false
-            referencedRelation: "holdings"
-            referencedColumns: ["id"]
-          },
         ]
       }
       holdings: {
@@ -368,22 +436,37 @@ export type Database = {
           border_south: string | null
           border_west: string | null
           city_id: string
+          created_at: string
+          credit_type: string
+          crop_type: string | null
           dedup_key: string | null
           directorate: string | null
           feddan: number
+          growth_stages: string | null
           holder_name: string | null
+          holder_name_farmer_card: string | null
           holding_id_number: string | null
           id: string
           import_batch_id: string | null
           imported_at: string
+          is_delegate: boolean
+          is_inheritance: boolean
           is_stale: boolean
           land_number: string | null
           national_id: string | null
+          notes: string | null
+          owner_name: string | null
+          owner_name_farmer_card: string | null
           page_number: string | null
+          person_id: string | null
           qirat: number
+          reform_type: string | null
           sahm: number
+          soil_type: string | null
           total_sqm: number | null
           unified_number: string | null
+          updated_at: string
+          usage_type: string
         }
         Insert: {
           administration?: string | null
@@ -395,22 +478,37 @@ export type Database = {
           border_south?: string | null
           border_west?: string | null
           city_id: string
+          created_at?: string
+          credit_type?: string
+          crop_type?: string | null
           dedup_key?: string | null
           directorate?: string | null
           feddan?: number
+          growth_stages?: string | null
           holder_name?: string | null
+          holder_name_farmer_card?: string | null
           holding_id_number?: string | null
           id?: string
           import_batch_id?: string | null
           imported_at?: string
+          is_delegate?: boolean
+          is_inheritance?: boolean
           is_stale?: boolean
           land_number?: string | null
           national_id?: string | null
+          notes?: string | null
+          owner_name?: string | null
+          owner_name_farmer_card?: string | null
           page_number?: string | null
+          person_id?: string | null
           qirat?: number
+          reform_type?: string | null
           sahm?: number
+          soil_type?: string | null
           total_sqm?: number | null
           unified_number?: string | null
+          updated_at?: string
+          usage_type?: string
         }
         Update: {
           administration?: string | null
@@ -422,22 +520,37 @@ export type Database = {
           border_south?: string | null
           border_west?: string | null
           city_id?: string
+          created_at?: string
+          credit_type?: string
+          crop_type?: string | null
           dedup_key?: string | null
           directorate?: string | null
           feddan?: number
+          growth_stages?: string | null
           holder_name?: string | null
+          holder_name_farmer_card?: string | null
           holding_id_number?: string | null
           id?: string
           import_batch_id?: string | null
           imported_at?: string
+          is_delegate?: boolean
+          is_inheritance?: boolean
           is_stale?: boolean
           land_number?: string | null
           national_id?: string | null
+          notes?: string | null
+          owner_name?: string | null
+          owner_name_farmer_card?: string | null
           page_number?: string | null
+          person_id?: string | null
           qirat?: number
+          reform_type?: string | null
           sahm?: number
+          soil_type?: string | null
           total_sqm?: number | null
           unified_number?: string | null
+          updated_at?: string
+          usage_type?: string
         }
         Relationships: [
           {
@@ -590,6 +703,117 @@ export type Database = {
       }
     }
     Views: {
+      added_holdings_with_merged_edits: {
+        Row: {
+          administration: string | null
+          association_name: string | null
+          basin_code: string | null
+          basin_name: string | null
+          border_east: string | null
+          border_north: string | null
+          border_south: string | null
+          border_west: string | null
+          city_id: string | null
+          client_id: string | null
+          created_at: string | null
+          created_by: string | null
+          credit_type: string | null
+          crop_type: string | null
+          directorate: string | null
+          feddan: number | null
+          growth_stages: string | null
+          holder_name: string | null
+          holder_name_farmer_card: string | null
+          holding_id_number: string | null
+          id: string | null
+          is_delegate: boolean | null
+          is_inheritance: boolean | null
+          land_number: string | null
+          national_id: string | null
+          notes: string | null
+          owner_name: string | null
+          owner_name_farmer_card: string | null
+          page_number: string | null
+          parent_holding_id: string | null
+          person_id: string | null
+          promoted_holding_id: string | null
+          qirat: number | null
+          reform_type: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sahm: number | null
+          soil_type: string | null
+          status: Database["public"]["Enums"]["record_status"] | null
+          total_sqm: number | null
+          updated_at: string | null
+          usage_type: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "added_holdings_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "added_holdings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "added_holdings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "team_activity"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "added_holdings_parent_holding_id_fkey"
+            columns: ["parent_holding_id"]
+            isOneToOne: false
+            referencedRelation: "holdings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "added_holdings_parent_holding_id_fkey"
+            columns: ["parent_holding_id"]
+            isOneToOne: false
+            referencedRelation: "holdings_with_merged_edits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "added_holdings_promoted_holding_id_fkey"
+            columns: ["promoted_holding_id"]
+            isOneToOne: false
+            referencedRelation: "holdings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "added_holdings_promoted_holding_id_fkey"
+            columns: ["promoted_holding_id"]
+            isOneToOne: false
+            referencedRelation: "holdings_with_merged_edits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "added_holdings_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "added_holdings_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "team_activity"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       audit_feed: {
         Row: {
           city_id: string | null
@@ -709,11 +933,64 @@ export type Database = {
             referencedRelation: "team_activity"
             referencedColumns: ["user_id"]
           },
+        ]
+      }
+      holdings_with_merged_edits: {
+        Row: {
+          administration: string | null
+          association_name: string | null
+          basin_code: string | null
+          basin_name: string | null
+          border_east: string | null
+          border_north: string | null
+          border_south: string | null
+          border_west: string | null
+          city_id: string | null
+          created_at: string | null
+          credit_type: string | null
+          crop_type: string | null
+          dedup_key: string | null
+          directorate: string | null
+          feddan: number | null
+          growth_stages: string | null
+          holder_name: string | null
+          holder_name_farmer_card: string | null
+          holding_id_number: string | null
+          id: string | null
+          import_batch_id: string | null
+          imported_at: string | null
+          is_delegate: boolean | null
+          is_inheritance: boolean | null
+          is_stale: boolean | null
+          land_number: string | null
+          national_id: string | null
+          notes: string | null
+          owner_name: string | null
+          owner_name_farmer_card: string | null
+          page_number: string | null
+          person_id: string | null
+          qirat: number | null
+          reform_type: string | null
+          sahm: number | null
+          soil_type: string | null
+          total_sqm: number | null
+          unified_number: string | null
+          updated_at: string | null
+          usage_type: string | null
+        }
+        Relationships: [
           {
-            foreignKeyName: "holding_edits_holding_id_fkey"
-            columns: ["holding_id"]
+            foreignKeyName: "holdings_city_id_fkey"
+            columns: ["city_id"]
             isOneToOne: false
-            referencedRelation: "holdings"
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "holdings_import_batch_id_fkey"
+            columns: ["import_batch_id"]
+            isOneToOne: false
+            referencedRelation: "import_batches"
             referencedColumns: ["id"]
           },
         ]
@@ -774,6 +1051,60 @@ export type Database = {
         }
         Relationships: []
       }
+      unified_holdings_export: {
+        Row: {
+          administration: string | null
+          association_name: string | null
+          association_subtype: string | null
+          association_type:
+            | Database["public"]["Enums"]["association_type"]
+            | null
+          basin_code: string | null
+          basin_name: string | null
+          border_east: string | null
+          border_north: string | null
+          border_south: string | null
+          border_west: string | null
+          city_id: string | null
+          city_name: string | null
+          classification:
+            | Database["public"]["Enums"]["city_classification"]
+            | null
+          created_at: string | null
+          credit_type: string | null
+          crop_type: string | null
+          dedup_key: string | null
+          directorate: string | null
+          feddan: number | null
+          growth_stages: string | null
+          holder_name: string | null
+          holder_name_farmer_card: string | null
+          holding_id_number: string | null
+          id: string | null
+          import_batch_id: string | null
+          imported_at: string | null
+          is_delegate: boolean | null
+          is_inheritance: boolean | null
+          is_stale: boolean | null
+          land_number: string | null
+          national_id: string | null
+          notes: string | null
+          owner_name: string | null
+          owner_name_farmer_card: string | null
+          page_number: string | null
+          person_id: string | null
+          qirat: number | null
+          reform_type: string | null
+          sahm: number | null
+          short_code: string | null
+          soil_type: string | null
+          total_sqm: number | null
+          unified_number: string | null
+          updated_at: string | null
+          usage_type: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       approve_added_holding: {
@@ -788,22 +1119,37 @@ export type Database = {
           border_south: string | null
           border_west: string | null
           city_id: string
+          created_at: string
+          credit_type: string
+          crop_type: string | null
           dedup_key: string | null
           directorate: string | null
           feddan: number
+          growth_stages: string | null
           holder_name: string | null
+          holder_name_farmer_card: string | null
           holding_id_number: string | null
           id: string
           import_batch_id: string | null
           imported_at: string
+          is_delegate: boolean
+          is_inheritance: boolean
           is_stale: boolean
           land_number: string | null
           national_id: string | null
+          notes: string | null
+          owner_name: string | null
+          owner_name_farmer_card: string | null
           page_number: string | null
+          person_id: string | null
           qirat: number
+          reform_type: string | null
           sahm: number
+          soil_type: string | null
           total_sqm: number | null
           unified_number: string | null
+          updated_at: string
+          usage_type: string
         }
         SetofOptions: {
           from: "*"
@@ -842,10 +1188,6 @@ export type Database = {
           total_sqm: number
         }[]
       }
-      delete_city_cascade: {
-        Args: { p_city_id: string }
-        Returns: undefined
-      }
       commit_import_batch: {
         Args: {
           p_city_id: string
@@ -862,6 +1204,7 @@ export type Database = {
         Args: { roles: Database["public"]["Enums"]["user_role"][] }
         Returns: boolean
       }
+      delete_city_cascade: { Args: { p_city_id: string }; Returns: undefined }
       reject_added_holding: {
         Args: { p_added_holding_id: string; p_reason: string }
         Returns: undefined
@@ -875,6 +1218,7 @@ export type Database = {
     }
     Enums: {
       association_type: "agricultural_credit" | "agricultural_reform"
+      city_classification: "استصلاح" | "ائتمان" | "اصلاح"
       city_status: "draft" | "published" | "archived"
       record_status: "pending" | "approved" | "rejected"
       user_role: "admin" | "editor" | "viewer" | "field"
@@ -1003,8 +1347,13 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
+      association_type: ["agricultural_credit", "agricultural_reform"],
+      city_classification: ["استصلاح", "ائتمان", "اصلاح"],
       city_status: ["draft", "published", "archived"],
       record_status: ["pending", "approved", "rejected"],
       user_role: ["admin", "editor", "viewer", "field"],

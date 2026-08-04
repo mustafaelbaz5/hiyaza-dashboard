@@ -9,6 +9,7 @@ export const TABLES = {
   importBatches: "import_batches",
   qualitySnapshots: "quality_snapshots",
   adminActions: "admin_actions",
+  unifiedHoldingsExport: "unified_holdings_export",
 } as const;
 
 export const STORAGE_BUCKETS = {
@@ -68,3 +69,11 @@ export const ASSOCIATION_SUBTYPES: Record<AssociationType, readonly string[]> = 
   agricultural_credit: ["ملك", "اوقاف"],
   agricultural_reform: ["إصلاح مُملك", "إصلاح اشتراكي", "إصلاح قانون ثلاثة"],
 };
+
+/**
+ * A separate, third city classification (distinct from association type/subtype above) — matches
+ * the `city_classification` enum (supabase/migrations/
+ * 20260801200600_cities_classification_and_short_code.sql) byte-for-byte.
+ */
+export const CITY_CLASSIFICATIONS = ["استصلاح", "ائتمان", "اصلاح"] as const;
+export type CityClassification = (typeof CITY_CLASSIFICATIONS)[number];
