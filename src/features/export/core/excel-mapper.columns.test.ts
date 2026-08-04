@@ -116,12 +116,18 @@ describe("excel-mapper: basin/soil/usage/crop fields (columns 17-22)", () => {
     expect(mapToExcelRow(rowNoSoil)["نوع التربة"]).toBe("طينية");
   });
 
-  it("column 20 (نوع الاستخدام): defaults to 'زراعي' when missing", () => {
+  it("column 20 (نوع الاستخدام): reads from the database, defaults to 'زراعي' when null or empty", () => {
     const row = mapToExcelRow(sampleRow);
     expect(row["نوع الاستخدام"]).toBe("زراعة");
 
-    const rowNoUsage = { ...sampleRow, usageType: null };
-    expect(mapToExcelRow(rowNoUsage)["نوع الاستخدام"]).toBe("زراعي");
+    const rowNullUsage = { ...sampleRow, usageType: null };
+    expect(mapToExcelRow(rowNullUsage)["نوع الاستخدام"]).toBe("زراعي");
+
+    // holdings.usage_type/added_holdings.usage_type are `not null default ''` in the live schema —
+    // an empty string, not null, is the actual "missing" value the DB sends. `??` alone would miss
+    // this case; the mapper must treat '' as missing too.
+    const rowEmptyUsage = { ...sampleRow, usageType: "" };
+    expect(mapToExcelRow(rowEmptyUsage)["نوع الاستخدام"]).toBe("زراعي");
   });
 
   it("column 21 (نوع المحصول): maps cropType, empty if missing", () => {

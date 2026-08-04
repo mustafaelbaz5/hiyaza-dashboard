@@ -61,7 +61,7 @@ export function mapToExcelRow(row: UnifiedDatasetRow): ExcelExportRow {
     "كود الحوض": "", // always empty — no "-1" placeholder
     "اسم الحوض": row.basinName ?? "",
     "نوع التربة": row.soilType ?? DEFAULT_SOIL_TYPE,
-    "نوع الاستخدام": row.usageType ?? DEFAULT_USAGE_TYPE,
+    "نوع الاستخدام": row.usageType && row.usageType.trim() !== "" ? row.usageType : DEFAULT_USAGE_TYPE,
     "نوع المحصول": row.cropType ?? "",
     "مراحل النمو": row.growthStages ?? "", // no agreed default exists; empty if missing
     "اسم الحائز من كارت الفلاح": row.holderNameFarmerCard ?? row.holderName ?? "",
