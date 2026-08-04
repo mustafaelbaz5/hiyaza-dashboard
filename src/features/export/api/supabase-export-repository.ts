@@ -8,8 +8,9 @@ import type { ExportFilters, ExportRepository, UnifiedExportRow } from "../types
 const EXPORT_CAP = 20_000;
 
 /** Export repository — reads the unified_holdings_export view. Filtering lives here only;
- * the dataset builder and Excel mapper never see ExportFilters (see DASHBOARD_ID_ALIGNMENT.md-
- * adjacent export plan for why this boundary matters for future filter dimensions). */
+ * the dataset builder and Excel mapper never see ExportFilters. This boundary ensures new
+ * filter dimensions can be added to the repository without touching data-building or mapping
+ * logic, keeping concerns cleanly separated. */
 export function createSupabaseExportRepository(
   supabase: SupabaseClient<Database>,
 ): ExportRepository {
@@ -21,8 +22,28 @@ export function createSupabaseExportRepository(
         .eq("is_stale", false)
         .limit(EXPORT_CAP);
 
-      if (filters.cityId) query = query.eq("city_id", filters.cityId);
-      if (filters.associationType) query = query.eq("association_type", filters.associationType);
+      // Apply cityId filter (most common use case)
+      if (filters.cityId) {
+        query = query.eq("city_id", filters.cityId);
+      }
+
+      // Apply associationType filter (wired in Phase E)
+      if (filters.associationType) {
+        query = query.eq("association_type", filters.associationType);
+      }
+
+      // Future: reviewStatus, approvalStatus, userId, etc. can be added here without
+      // touching build-unified-dataset.ts or excel-mapper.ts (they only operate on
+      // filtered results, not on the filter logic itself).
+
+      // Apply custom filters if provided (allows adhoc querying without code changes)
+      if (filters.custom) {
+        for (const [key, value] of Object.entries(filters.custom)) {
+          if (value !== undefined && value !== null) {
+            query = query.eq(key, value);
+          }
+        }
+      }
 
       const { data, error } = await query;
       if (error) return err(fromSupabaseError(error));

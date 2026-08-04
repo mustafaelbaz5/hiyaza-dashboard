@@ -22,6 +22,10 @@ export interface UnifiedDatasetRow {
   sahm: number;
   basinCode: string | null;
   basinName: string | null;
+  borderEast: string | null;
+  borderWest: string | null;
+  borderSouth: string | null;
+  borderNorth: string | null;
   soilType: string | null;
   usageType: string | null;
   cropType: string | null;
@@ -54,6 +58,10 @@ export function buildUnifiedDataset(rows: UnifiedExportRow[]): UnifiedDatasetRow
     sahm: row.sahm,
     basinCode: row.basin_code,
     basinName: row.basin_name,
+    borderEast: row.border_east,
+    borderWest: row.border_west,
+    borderSouth: row.border_south,
+    borderNorth: row.border_north,
     soilType: row.soil_type,
     usageType: row.usage_type,
     cropType: row.crop_type,
