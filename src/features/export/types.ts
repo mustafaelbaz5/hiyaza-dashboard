@@ -1,7 +1,6 @@
 import type { Result } from "@/lib/result";
 import type { AppError } from "@/lib/errors";
 import type { AssociationType, CityClassification } from "@/lib/constants";
-import type { Json } from "@/lib/supabase/database.types";
 
 /** One raw row from the unified_holdings_export view — fully merged with all edits applied.
  * All fields reflect the latest state; no raw payloads. */

@@ -48,6 +48,9 @@ export function createSupabaseExportRepository(
       const { data, error } = await query;
       if (error) return err(fromSupabaseError(error));
 
+      // database.types.ts is generated from the live DB and goes stale until regenerated after
+      // a migration (e.g. 20260801201000 restoring this view's shape) — cast via unknown until
+      // `supabase gen types` is re-run against the migrated database.
       return ok((data ?? []) as unknown as UnifiedExportRow[]);
     },
   };
