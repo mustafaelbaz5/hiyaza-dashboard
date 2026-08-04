@@ -32,7 +32,9 @@ export type Database = {
           crop_type: string | null
           directorate: string | null
           feddan: number
+          growth_stages: string | null
           holder_name: string
+          holder_name_farmer_card: string | null
           holding_id_number: string | null
           id: string
           is_delegate: boolean
@@ -41,14 +43,17 @@ export type Database = {
           national_id: string | null
           notes: string | null
           owner_name: string | null
+          owner_name_farmer_card: string | null
           page_number: string | null
           parent_holding_id: string | null
+          person_id: string | null
           promoted_holding_id: string | null
           qirat: number
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           sahm: number
+          soil_type: string | null
           status: Database["public"]["Enums"]["record_status"]
           total_sqm: number | null
           unified_number: string | null
@@ -72,7 +77,9 @@ export type Database = {
           crop_type?: string | null
           directorate?: string | null
           feddan?: number
+          growth_stages?: string | null
           holder_name: string
+          holder_name_farmer_card?: string | null
           holding_id_number?: string | null
           id?: string
           is_delegate?: boolean
@@ -81,14 +88,17 @@ export type Database = {
           national_id?: string | null
           notes?: string | null
           owner_name?: string | null
+          owner_name_farmer_card?: string | null
           page_number?: string | null
           parent_holding_id?: string | null
+          person_id?: string | null
           promoted_holding_id?: string | null
           qirat?: number
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           sahm?: number
+          soil_type?: string | null
           status?: Database["public"]["Enums"]["record_status"]
           total_sqm?: number | null
           unified_number?: string | null
@@ -112,7 +122,9 @@ export type Database = {
           crop_type?: string | null
           directorate?: string | null
           feddan?: number
+          growth_stages?: string | null
           holder_name?: string
+          holder_name_farmer_card?: string | null
           holding_id_number?: string | null
           id?: string
           is_delegate?: boolean
@@ -121,14 +133,17 @@ export type Database = {
           national_id?: string | null
           notes?: string | null
           owner_name?: string | null
+          owner_name_farmer_card?: string | null
           page_number?: string | null
           parent_holding_id?: string | null
+          person_id?: string | null
           promoted_holding_id?: string | null
           qirat?: number
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           sahm?: number
+          soil_type?: string | null
           status?: Database["public"]["Enums"]["record_status"]
           total_sqm?: number | null
           unified_number?: string | null
@@ -240,12 +255,14 @@ export type Database = {
           administration: string | null
           association_subtype: string | null
           association_type: Database["public"]["Enums"]["association_type"] | null
+          classification: Database["public"]["Enums"]["city_classification"] | null
           created_at: string
           created_by: string | null
           data_version: number
           directorate: string | null
           id: string
           name: string
+          short_code: string | null
           status: Database["public"]["Enums"]["city_status"]
           updated_at: string
         }
@@ -253,12 +270,14 @@ export type Database = {
           administration?: string | null
           association_subtype?: string | null
           association_type?: Database["public"]["Enums"]["association_type"] | null
+          classification?: Database["public"]["Enums"]["city_classification"] | null
           created_at?: string
           created_by?: string | null
           data_version?: number
           directorate?: string | null
           id?: string
           name: string
+          short_code?: string | null
           status?: Database["public"]["Enums"]["city_status"]
           updated_at?: string
         }
@@ -266,12 +285,14 @@ export type Database = {
           administration?: string | null
           association_subtype?: string | null
           association_type?: Database["public"]["Enums"]["association_type"] | null
+          classification?: Database["public"]["Enums"]["city_classification"] | null
           created_at?: string
           created_by?: string | null
           data_version?: number
           directorate?: string | null
           id?: string
           name?: string
+          short_code?: string | null
           status?: Database["public"]["Enums"]["city_status"]
           updated_at?: string
         }
@@ -371,7 +392,9 @@ export type Database = {
           dedup_key: string | null
           directorate: string | null
           feddan: number
+          growth_stages: string | null
           holder_name: string | null
+          holder_name_farmer_card: string | null
           holding_id_number: string | null
           id: string
           import_batch_id: string | null
@@ -379,9 +402,12 @@ export type Database = {
           is_stale: boolean
           land_number: string | null
           national_id: string | null
+          owner_name_farmer_card: string | null
           page_number: string | null
+          person_id: string | null
           qirat: number
           sahm: number
+          soil_type: string | null
           total_sqm: number | null
           unified_number: string | null
         }
@@ -398,7 +424,9 @@ export type Database = {
           dedup_key?: string | null
           directorate?: string | null
           feddan?: number
+          growth_stages?: string | null
           holder_name?: string | null
+          holder_name_farmer_card?: string | null
           holding_id_number?: string | null
           id?: string
           import_batch_id?: string | null
@@ -406,9 +434,12 @@ export type Database = {
           is_stale?: boolean
           land_number?: string | null
           national_id?: string | null
+          owner_name_farmer_card?: string | null
           page_number?: string | null
+          person_id?: string | null
           qirat?: number
           sahm?: number
+          soil_type?: string | null
           total_sqm?: number | null
           unified_number?: string | null
         }
@@ -425,7 +456,9 @@ export type Database = {
           dedup_key?: string | null
           directorate?: string | null
           feddan?: number
+          growth_stages?: string | null
           holder_name?: string | null
+          holder_name_farmer_card?: string | null
           holding_id_number?: string | null
           id?: string
           import_batch_id?: string | null
@@ -433,9 +466,12 @@ export type Database = {
           is_stale?: boolean
           land_number?: string | null
           national_id?: string | null
+          owner_name_farmer_card?: string | null
           page_number?: string | null
+          person_id?: string | null
           qirat?: number
           sahm?: number
+          soil_type?: string | null
           total_sqm?: number | null
           unified_number?: string | null
         }
@@ -608,6 +644,63 @@ export type Database = {
           holdings_count: number | null
           total_feddan: number | null
           total_sqm: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holdings_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unified_holdings_export: {
+        Row: {
+          added_notes: string | null
+          administration: string | null
+          association_name: string | null
+          association_subtype: string | null
+          association_type: Database["public"]["Enums"]["association_type"] | null
+          basin_code: string | null
+          basin_name: string | null
+          border_east: string | null
+          border_north: string | null
+          border_south: string | null
+          border_west: string | null
+          city_id: string | null
+          city_name: string | null
+          classification: Database["public"]["Enums"]["city_classification"] | null
+          client_id: string | null
+          credit_type: string | null
+          crop_type: string | null
+          dedup_key: string | null
+          directorate: string | null
+          feddan: number | null
+          growth_stages: string | null
+          holder_name: string | null
+          holder_name_farmer_card: string | null
+          holding_id_number: string | null
+          id: string | null
+          import_batch_id: string | null
+          imported_at: string | null
+          is_delegate: boolean | null
+          is_inheritance: boolean | null
+          is_stale: boolean | null
+          land_number: string | null
+          latest_edit_payload: Json | null
+          legacy_edit_key: string | null
+          national_id: string | null
+          owner_name: string | null
+          owner_name_farmer_card: string | null
+          page_number: string | null
+          person_id: string | null
+          qirat: number | null
+          sahm: number | null
+          short_code: string | null
+          soil_type: string | null
+          total_sqm: number | null
+          unified_number: string | null
         }
         Relationships: [
           {
@@ -875,6 +968,7 @@ export type Database = {
     }
     Enums: {
       association_type: "agricultural_credit" | "agricultural_reform"
+      city_classification: "استصلاح" | "ائتمان" | "اصلاح"
       city_status: "draft" | "published" | "archived"
       record_status: "pending" | "approved" | "rejected"
       user_role: "admin" | "editor" | "viewer" | "field"
