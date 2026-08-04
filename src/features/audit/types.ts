@@ -1,7 +1,7 @@
 import type { Result } from "@/lib/result";
 import type { AppError } from "@/lib/errors";
 
-export type AuditEntityType = "import" | "holding_edit" | "added_holding";
+export type AuditEntityType = "import" | "holding_edit" | "added_holding" | "city_management" | "user_management";
 
 export interface AuditEntry {
   entityType: AuditEntityType;
