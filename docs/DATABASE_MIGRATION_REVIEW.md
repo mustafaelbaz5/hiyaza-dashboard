@@ -1,12 +1,15 @@
 # HiyazaFinder — Database Migration Review
 
-**Status:** Pending approval. This document consolidates every migration decided in
-`DATABASE_REFERENCE.md` (§4, §7) and `REFACTOR_ROADMAP.md` (Phase 1/4) into one reviewable list, per
-item, ready for a single go/no-go decision before any SQL is written.
+**Status (2026-08-06): Batch 1 migration files written, NOT applied.** This document consolidates
+every migration decided in `DATABASE_REFERENCE.md` (§4, §7) and `REFACTOR_ROADMAP.md` (Phase 1/4)
+into one reviewable list. Batch 1 (items 1, 2, 3a, 7, 8, 9, 10) now has real SQL files in
+`supabase/migrations/` (dated `20260806150000`–`20260806150600`) plus a matching rollback file per
+migration in `supabase/migrations_rollback/` (never applied automatically by Supabase tooling — that
+folder is intentionally outside the CLI's migrations path). Items 11 and 12 remain design-only per
+their own gating below (11 needs a staging verification pass; 12 needs explicit sign-off).
 
-**No SQL has been written. Nothing has been executed. Supabase has not been modified.** This is a
-design-review document only. Migration files are created in a later, separate step, only after this
-document is approved.
+**Nothing has been executed. Supabase has not been modified.** Writing the files and applying them
+remain separate, explicitly gated steps — these files are deployment-ready, not deployed.
 
 **Source of truth for every claim below:** live queries against the production Supabase project
 `bbahuyqjptojlighriyy` (`list_migrations`, `execute_sql` — read-only `SELECT`/catalog introspection
