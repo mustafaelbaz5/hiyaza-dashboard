@@ -32,6 +32,16 @@ function makeBase(overrides: Partial<HoldingBaseRow> = {}): HoldingBaseRow {
     total_sqm: 4200,
     is_stale: false,
     imported_at: "2026-01-01T00:00:00Z",
+    credit_type: "ملك",
+    reform_type: null,
+    usage_type: "زراعة",
+    crop_type: null,
+    owner_name: null,
+    growth_stages: null,
+    is_delegate: false,
+    is_inheritance: false,
+    notes: null,
+    soil_type: null,
     ...overrides,
   };
 }
@@ -80,7 +90,7 @@ describe("mergeHolding", () => {
 describe("buildEditPayload", () => {
   it("carries forward every editable field's current value, changing only the target field", () => {
     const base = makeBase();
-    const current: MergedHolding = { ...base, isEdited: false, editedFields: [] };
+    const current: MergedHolding = { ...base, isEdited: false, editedFields: [], provenance: "original" };
     const payload = buildEditPayload(current, "holder_name", "اسم محدث");
 
     expect(payload.holder_name).toBe("اسم محدث");

@@ -24,6 +24,16 @@ export interface HoldingBaseRow {
   total_sqm: number | null;
   is_stale: boolean;
   imported_at: string;
+  credit_type: string;
+  reform_type: string | null;
+  usage_type: string;
+  crop_type: string | null;
+  owner_name: string | null;
+  growth_stages: string | null;
+  is_delegate: boolean;
+  is_inheritance: boolean;
+  notes: string | null;
+  soil_type: string | null;
 }
 
 export type EditPayload = Partial<Record<EditableField, string | number | null>>;
@@ -47,19 +57,36 @@ export function normalizeEditPayload(rawPayload: Record<string, unknown> | null)
   return normalized;
 }
 
+/**
+ * Where a holding row originated:
+ * - "original": imported, never edited.
+ * - "modified": imported, has at least one edit in holding_edits.
+ * - "added": promoted from added_holdings (a field-added record), regardless of edit state.
+ */
+export type HoldingProvenance = "original" | "modified" | "added";
+
 export interface MergedHolding extends HoldingBaseRow {
   isEdited: boolean;
   editedFields: EditableField[];
+  provenance: HoldingProvenance;
 }
 
 /**
  * Overlays a holding's imported values with its latest edit payload (a full snapshot, not a
  * diff — see holding_edits_latest in APP_PLAN.md § 6). The `holdings` row is never mutated;
  * this merge is what every reader (dashboard and app alike) does at display time.
+ *
+ * `isPromoted` reflects whether this holding's id appears as an `added_holdings.promoted_holding_id`
+ * — the same lineage signal the review feature already reads (see supabase-review-repository.ts) —
+ * and takes precedence over the edited/unedited distinction for provenance purposes.
  */
-export function mergeHolding(base: HoldingBaseRow, latestEditPayload: EditPayload | null): MergedHolding {
+export function mergeHolding(
+  base: HoldingBaseRow,
+  latestEditPayload: EditPayload | null,
+  isPromoted = false,
+): MergedHolding {
   if (!latestEditPayload) {
-    return { ...base, isEdited: false, editedFields: [] };
+    return { ...base, isEdited: false, editedFields: [], provenance: isPromoted ? "added" : "original" };
   }
 
   const editedFields: EditableField[] = [];
@@ -75,7 +102,9 @@ export function mergeHolding(base: HoldingBaseRow, latestEditPayload: EditPayloa
     }
   }
 
-  return { ...merged, isEdited: editedFields.length > 0, editedFields };
+  const isEdited = editedFields.length > 0;
+  const provenance: HoldingProvenance = isPromoted ? "added" : isEdited ? "modified" : "original";
+  return { ...merged, isEdited, editedFields, provenance };
 }
 
 /** Builds the full-snapshot payload for a new edit: current effective values with one field changed. */
