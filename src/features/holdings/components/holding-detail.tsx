@@ -9,6 +9,7 @@ import { useHolding } from "../hooks/use-holding";
 import { useCity } from "@/features/cities/hooks/use-city";
 import { ProvenanceBadge } from "./provenance-badge";
 import { AssociationTypeSection } from "./holding-detail-sections";
+import { HoldingHistoryTimeline } from "./holding-history-timeline";
 import { FIELD_LABELS, type EditableField } from "../core/editable-fields";
 
 const IDENTITY_FIELDS: EditableField[] = ["holder_name", "national_id"];
@@ -90,6 +91,7 @@ export function HoldingDetail({ holdingId, cityId }: { holdingId: string; cityId
       <FieldGroup title="الحدود" holding={holding} fields={BORDER_FIELDS} />
       <FieldGroup title="المساحة" holding={holding} fields={AREA_FIELDS} />
       <AssociationTypeSection holding={holding} associationType={city?.associationType ?? null} />
+      <HoldingHistoryTimeline holdingId={holdingId} />
     </div>
   );
 }

@@ -31,7 +31,16 @@ export interface HoldingEditDiff {
   after: unknown;
 }
 
+export interface HoldingEditHistoryEntry {
+  editId: string;
+  editedAt: string;
+  editedBy: string | null;
+  editedByDisplayName: string | null;
+  editedByEmail: string | null;
+}
+
 export interface AuditRepository {
   listFeed(filters: AuditFilters): Promise<Result<AuditEntryWithUser[], AppError>>;
   getHoldingEditDiff(holdingId: string, editId: string): Promise<Result<HoldingEditDiff[], AppError>>;
+  listHoldingEditHistory(holdingId: string): Promise<Result<HoldingEditHistoryEntry[], AppError>>;
 }
