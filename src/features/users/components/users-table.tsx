@@ -22,7 +22,8 @@ import {
   useForceSignOut,
   useSendPasswordReset,
 } from "../hooks/use-user-mutations";
-import { formatDate } from "@/lib/format";
+import { useTeamActivity } from "@/features/analytics/hooks/use-team-activity";
+import { formatDate, formatNumber } from "@/lib/format";
 import type { AppRole, DashboardUser } from "../types";
 
 const ROLE_LABELS: Record<AppRole, string> = {
@@ -35,11 +36,19 @@ const ROLE_LABELS: Record<AppRole, string> = {
 /** Admin-only users table: role changes, enable/disable, force sign-out, password reset. */
 export function UsersTable() {
   const { data, isLoading, error, refetch } = useUsers();
+  const { data: teamActivity } = useTeamActivity();
   const setRole = useSetUserRole();
   const setActive = useSetUserActive();
   const forceSignOut = useForceSignOut();
   const sendPasswordReset = useSendPasswordReset();
   const rows = useMemo(() => data ?? [], [data]);
+  const activityByUserId = useMemo(() => {
+    const map = new Map<string, NonNullable<typeof teamActivity>[number]>();
+    for (const row of teamActivity ?? []) {
+      if (row.user_id) map.set(row.user_id, row);
+    }
+    return map;
+  }, [teamActivity]);
 
   const columns: ColumnDef<DashboardUser>[] = [
     { accessorKey: "displayName", header: "الاسم" },
@@ -89,6 +98,37 @@ export function UsersTable() {
       accessorKey: "createdAt",
       header: "تاريخ الانضمام",
       cell: ({ row }) => formatDate(row.original.createdAt),
+    },
+    {
+      id: "recordsAdded",
+      header: "سجلات مضافة",
+      cell: ({ row }) => formatNumber(activityByUserId.get(row.original.id)?.records_added ?? 0),
+    },
+    {
+      id: "editsMade",
+      header: "تعديلات",
+      cell: ({ row }) => formatNumber(activityByUserId.get(row.original.id)?.edits_made ?? 0),
+    },
+    {
+      id: "citiesTouched",
+      header: "الجمعيات",
+      cell: ({ row }) => formatNumber(activityByUserId.get(row.original.id)?.cities_touched ?? 0),
+    },
+    {
+      id: "approvalRate",
+      header: "نسبة القبول",
+      cell: ({ row }) => {
+        const rate = activityByUserId.get(row.original.id)?.approval_rate;
+        return rate === null || rate === undefined ? "—" : `${rate}%`;
+      },
+    },
+    {
+      id: "lastActiveAt",
+      header: "آخر نشاط",
+      cell: ({ row }) => {
+        const lastActive = activityByUserId.get(row.original.id)?.last_active_at;
+        return lastActive ? formatDate(lastActive) : "—";
+      },
     },
     {
       id: "actions",
