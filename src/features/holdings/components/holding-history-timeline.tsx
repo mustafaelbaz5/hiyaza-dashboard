@@ -40,9 +40,21 @@ export function HoldingHistoryTimeline({ holdingId }: { holdingId: string }) {
               return (
                 <div key={entry.editId} className="rounded-lg border border-border p-3">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm text-muted-foreground">
-                      {entry.editedByDisplayName ?? entry.editedByEmail ?? "—"}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">
+                        {entry.editedByDisplayName ?? entry.editedByEmail ?? "—"}
+                      </span>
+                      {entry.targetWasStale && (
+                        <span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300">
+                          حيازة قديمة
+                        </span>
+                      )}
+                      {entry.holdingType === "added_holding" && (
+                        <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
+                          حيازة مضافة
+                        </span>
+                      )}
+                    </div>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                       <span>{formatDate(entry.editedAt, { dateStyle: "medium", timeStyle: "short" })}</span>
                       <Button

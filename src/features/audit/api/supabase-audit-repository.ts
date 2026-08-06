@@ -102,7 +102,7 @@ export function createSupabaseAuditRepository(
     async listHoldingEditHistory(holdingId: string) {
       const { data: edits, error: editsError } = await supabase
         .from("holding_edits")
-        .select("id, edited_at, edited_by")
+        .select("id, edited_at, edited_by, holding_type, target_was_stale, operation_id")
         .eq("holding_id", holdingId)
         .order("edited_at", { ascending: false });
       if (editsError) return err(fromSupabaseError(editsError));
@@ -119,6 +119,9 @@ export function createSupabaseAuditRepository(
         editedBy: e.edited_by,
         editedByDisplayName: (e.edited_by && profileMap.get(e.edited_by)?.display_name) || null,
         editedByEmail: (e.edited_by && profileMap.get(e.edited_by)?.email) || null,
+        holdingType: (e.holding_type as "holding" | "added_holding" | undefined) || "holding",
+        targetWasStale: e.target_was_stale || false,
+        operationId: e.operation_id || null,
       }));
 
       return ok(history);

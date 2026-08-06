@@ -37,6 +37,9 @@ export interface HoldingEditHistoryEntry {
   editedBy: string | null;
   editedByDisplayName: string | null;
   editedByEmail: string | null;
+  holdingType?: "holding" | "added_holding";
+  targetWasStale?: boolean;
+  operationId?: string | null;
 }
 
 export interface AuditRepository {

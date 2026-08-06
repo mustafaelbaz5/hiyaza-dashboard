@@ -13,6 +13,14 @@
 -- credit_type, reform_type, is_inheritance, is_delegate, usage_type, holder_name_farmer_card,
 -- owner_name_farmer_card, growth_stages). Seeding from the dashboard list alone would have made
 -- every real Flutter edit log a spurious "unknown key" warning.
+--
+-- CORRECTION (verified against live payloads on bbahuyqjptojlighriyy before applying): the app's
+-- real payloads also always carry a structural `holdingId` key (the holding's business id number,
+-- not a correction field) that isn't in Parcel.toEditableJson()'s explicit field list scan above.
+-- Without `holding_id` seeded here, EVERY live edit would trip the warn trigger — verified directly
+-- against the 3 most recent real holding_edits rows before this migration was applied. Added as a
+-- recognized structural key on both tables so the warn-only trigger only fires on genuinely unknown
+-- keys, not this universally-present one.
 
 create table if not exists editable_fields (
   field_name       text not null,
@@ -51,7 +59,8 @@ from (values
   ('usage_type', 'holdings'), ('usage_type', 'added_holdings'),
   ('holder_name_farmer_card', 'holdings'), ('holder_name_farmer_card', 'added_holdings'),
   ('owner_name_farmer_card', 'holdings'), ('owner_name_farmer_card', 'added_holdings'),
-  ('growth_stages', 'holdings'), ('growth_stages', 'added_holdings')
+  ('growth_stages', 'holdings'), ('growth_stages', 'added_holdings'),
+  ('holding_id', 'holdings'), ('holding_id', 'added_holdings')
 ) as seed(field_name, applies_to_table)
 on conflict (field_name, applies_to_table) do nothing;
 
