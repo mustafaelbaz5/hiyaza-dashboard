@@ -45,7 +45,7 @@ describe("buildPreviewSummary", () => {
       makeRow({ unifiedNumber: "A" }),
       makeRow({ unifiedNumber: "B" }),
     ];
-    const summary = buildPreviewSummary(rows, [], 2, [], new Set(["B", "C"]));
+    const summary = buildPreviewSummary(rows, [], 2, [], new Set(["U:B", "U:C"]));
     expect(summary.diff).toEqual({ newCount: 1, changedCount: 1, removedCount: 1 });
   });
 
@@ -59,15 +59,16 @@ describe("buildPreviewSummary", () => {
     expect(summary.detectedBasins).toEqual(["أ", "ب"]);
   });
 
-  it("carries through skipped-sheets and rejection info unchanged", () => {
+  it("carries through skipped-sheets and blank-row info unchanged", () => {
     const summary = buildPreviewSummary(
       [],
-      [{ row: 5, column: "اسم الحائز", reason: "مفقود" }],
+      [{ row: 5 }],
       1,
       [{ name: "البشيط", reason: "ورقة عرض مكررة" }],
       new Set(),
     );
-    expect(summary.rowsRejected).toBe(1);
+    expect(summary.rowsBlank).toBe(1);
+    expect(summary.blankRows).toEqual([{ row: 5 }]);
     expect(summary.skippedSheets).toHaveLength(1);
   });
 });
