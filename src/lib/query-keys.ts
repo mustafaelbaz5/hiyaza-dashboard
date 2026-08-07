@@ -25,6 +25,7 @@ export const queryKeys = {
   analytics: {
     systemOverview: ["analytics", "system-overview"] as const,
     cityDrilldown: (cityId: string) => ["analytics", "city", cityId] as const,
+    cityStatusBreakdown: (cityId: string) => ["analytics", "city-status", cityId] as const,
     quality: (cityId?: string) => ["analytics", "quality", cityId] as const,
     teamActivity: ["analytics", "team-activity"] as const,
   },
