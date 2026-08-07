@@ -1316,6 +1316,18 @@ export type Database = {
           total_sqm: number
         }[]
       }
+      city_status_breakdown: {
+        Args: { p_city_id: string }
+        Returns: {
+          added_count: number
+          modified_count: number
+          original_count: number
+          persons_with_added_parcel: number
+          persons_with_modified_parcel: number
+          total_holdings: number
+          total_persons: number
+        }[]
+      }
       commit_import_batch: {
         Args: {
           p_city_id: string

@@ -19,6 +19,20 @@ export function useCityDrilldown(cityId: string) {
   });
 }
 
+/** City Overview — parcel provenance (original/modified/added) and person status counts. */
+export function useCityStatusBreakdown(cityId: string) {
+  return useQuery({
+    queryKey: queryKeys.analytics.cityStatusBreakdown(cityId),
+    queryFn: async () => {
+      const repo = createSupabaseAnalyticsRepository(createClient());
+      const result = await repo.getCityStatusBreakdown(cityId);
+      if (!result.ok) throw result.error;
+      return result.value;
+    },
+    enabled: Boolean(cityId),
+  });
+}
+
 /** Board 2 — basin breakdown for a city. */
 export function useBasinBreakdown(cityId: string) {
   return useQuery({
