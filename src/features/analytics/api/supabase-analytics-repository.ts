@@ -27,6 +27,12 @@ export function createSupabaseAnalyticsRepository(
       return ok(data?.[0] ?? null);
     },
 
+    async getCityStatusBreakdown(cityId: string) {
+      const { data, error } = await supabase.rpc("city_status_breakdown", { p_city_id: cityId });
+      if (error) return err(fromSupabaseError(error));
+      return ok(data?.[0] ?? null);
+    },
+
     async getBasinBreakdown(cityId: string) {
       const { data, error } = await supabase
         .from("city_basin_breakdown")

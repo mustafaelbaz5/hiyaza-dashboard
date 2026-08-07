@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useCityDrilldown, useBasinBreakdown, useTopHolders } from "../hooks/use-city-analytics";
 import { BasinBreakdownChart } from "./basin-breakdown-chart";
+import { CityStatusBoard } from "@/features/cities/components/city-status-board";
 import { formatNumber, formatRoundedNumber, formatDate } from "@/lib/format";
 
 /** Board 2 — per-city drilldown: headline stats, basin breakdown, top holders. */
@@ -41,6 +42,8 @@ export function CityDrilldownBoard({ cityId }: { cityId: string }) {
           isLoading={isLoading}
         />
       </div>
+
+      <CityStatusBoard cityId={cityId} />
 
       <BasinBreakdownChart basins={basins ?? []} />
 
