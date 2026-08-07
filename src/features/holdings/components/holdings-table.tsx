@@ -95,10 +95,11 @@ export function HoldingsTable({ cityId }: { cityId: string }) {
 
   const columns = useMemo(() => buildColumns(cityId), [cityId]);
   const rows = useMemo(() => data?.rows ?? [], [data]);
-  const selectedIds = useMemo(
-    () => rows.filter((_, i) => rowSelection[i]).map((r) => r.id),
+  const selectedHoldings = useMemo(
+    () => rows.filter((_, i) => rowSelection[i]),
     [rows, rowSelection],
   );
+  const selectedIds = useMemo(() => selectedHoldings.map((r) => r.id), [selectedHoldings]);
 
   return (
     <div className="space-y-3">
@@ -165,7 +166,7 @@ export function HoldingsTable({ cityId }: { cityId: string }) {
 
       <BulkEditDialog
         cityId={cityId}
-        selectedIds={selectedIds}
+        selectedHoldings={selectedHoldings}
         open={bulkEditOpen}
         onOpenChange={setBulkEditOpen}
         onApplied={() => setRowSelection({})}

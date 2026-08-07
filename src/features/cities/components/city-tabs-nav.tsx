@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { segment: "", label: "نظرة عامة" },
   { segment: "holdings", label: "الحيازات" },
+  { segment: "tools", label: "الأدوات" },
   { segment: "import", label: "الاستيراد" },
   { segment: "quality", label: "الجودة" },
   { segment: "activity", label: "النشاط" },
