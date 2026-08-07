@@ -21,9 +21,11 @@ function downloadFailuresCsv(failures: CommitImportResult["failures"]) {
 }
 
 /**
- * The authoritative import result — every row's actual outcome (imported, duplicate/updated,
+ * The authoritative import result — every row's actual outcome (imported, duplicate/skipped,
  * or failed), not the pre-commit estimate. Nothing here is client-side aggregation: these
- * numbers come straight from the commit RPC's per-row processing.
+ * numbers come straight from the commit RPC's per-row processing. A duplicate row (same
+ * city + dedup_key as an existing non-stale holding) is skipped entirely, not merged or
+ * updated — the existing row is left untouched.
  */
 export function CommitResultStep({ result, onDone }: { result: CommitImportResult; onDone: () => void }) {
   return (
@@ -36,7 +38,7 @@ export function CommitResultStep({ result, onDone }: { result: CommitImportResul
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard label="إجمالي الصفوف" value={formatNumber(result.rowsTotal)} />
             <StatCard label="تم الاستيراد" value={formatNumber(result.rowsImported)} />
-            <StatCard label="مكررة (تم تحديثها)" value={formatNumber(result.rowsDuplicate)} />
+            <StatCard label="مكررة (تم تجاهلها)" value={formatNumber(result.rowsDuplicate)} />
             <StatCard label="فشلت" value={formatNumber(result.rowsFailed)} />
           </div>
 

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/client";
 import { createSupabaseExportRepository } from "../api/supabase-export-repository";
 import { buildUnifiedDataset } from "../core/build-unified-dataset";
 import { createExcelWorkbook, workbookToBlob } from "../core/excel-writer";
+import { buildExportFilename } from "../core/build-export-filename";
 import type { ExportFilters } from "../types";
 
 /** Hook for exporting unified holdings to Excel.
@@ -48,7 +49,7 @@ export function useExportUnifiedHoldings() {
 
       // 4. Generate blob and trigger download
       const blob = workbookToBlob(workbook);
-      const filename = `holdings-export-${new Date().toISOString().split("T")[0]}.xlsx`;
+      const filename = buildExportFilename(rows);
       downloadBlob(blob, filename);
 
       return {

@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.15"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       added_holdings: {
@@ -51,10 +26,14 @@ export type Database = {
           border_west: string | null
           city_id: string
           client_id: string
+          completed_at: string | null
+          completed_by: string | null
           created_at: string
           created_by: string
           credit_type: string
           crop_type: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           directorate: string | null
           feddan: number
           growth_stages: string | null
@@ -76,6 +55,7 @@ export type Database = {
           qirat: number
           reform_type: string | null
           rejection_reason: string | null
+          reviewed: boolean
           reviewed_at: string | null
           reviewed_by: string | null
           sahm: number
@@ -97,10 +77,14 @@ export type Database = {
           border_west?: string | null
           city_id: string
           client_id: string
+          completed_at?: string | null
+          completed_by?: string | null
           created_at?: string
           created_by: string
           credit_type?: string
           crop_type?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           directorate?: string | null
           feddan?: number
           growth_stages?: string | null
@@ -122,6 +106,7 @@ export type Database = {
           qirat?: number
           reform_type?: string | null
           rejection_reason?: string | null
+          reviewed?: boolean
           reviewed_at?: string | null
           reviewed_by?: string | null
           sahm?: number
@@ -143,10 +128,14 @@ export type Database = {
           border_west?: string | null
           city_id?: string
           client_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
           created_at?: string
           created_by?: string
           credit_type?: string
           crop_type?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           directorate?: string | null
           feddan?: number
           growth_stages?: string | null
@@ -168,6 +157,7 @@ export type Database = {
           qirat?: number
           reform_type?: string | null
           rejection_reason?: string | null
+          reviewed?: boolean
           reviewed_at?: string | null
           reviewed_by?: string | null
           sahm?: number
@@ -187,6 +177,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "added_holdings_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "added_holdings_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "team_activity"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "added_holdings_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -196,6 +200,20 @@ export type Database = {
           {
             foreignKeyName: "added_holdings_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "team_activity"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "added_holdings_deleted_by_fkey"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "added_holdings_deleted_by_fkey"
+            columns: ["deleted_by"]
             isOneToOne: false
             referencedRelation: "team_activity"
             referencedColumns: ["user_id"]
@@ -292,6 +310,27 @@ export type Database = {
           },
         ]
       }
+      association_types: {
+        Row: {
+          code: string
+          label_ar: string
+          label_en: string | null
+          sort_order: number
+        }
+        Insert: {
+          code: string
+          label_ar: string
+          label_en?: string | null
+          sort_order?: number
+        }
+        Update: {
+          code?: string
+          label_ar?: string
+          label_en?: string | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
       cities: {
         Row: {
           administration: string | null
@@ -299,6 +338,7 @@ export type Database = {
           association_type:
             | Database["public"]["Enums"]["association_type"]
             | null
+          association_type_code: string | null
           classification:
             | Database["public"]["Enums"]["city_classification"]
             | null
@@ -318,6 +358,7 @@ export type Database = {
           association_type?:
             | Database["public"]["Enums"]["association_type"]
             | null
+          association_type_code?: string | null
           classification?:
             | Database["public"]["Enums"]["city_classification"]
             | null
@@ -337,6 +378,7 @@ export type Database = {
           association_type?:
             | Database["public"]["Enums"]["association_type"]
             | null
+          association_type_code?: string | null
           classification?:
             | Database["public"]["Enums"]["city_classification"]
             | null
@@ -351,6 +393,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "cities_association_type_code_fkey"
+            columns: ["association_type_code"]
+            isOneToOne: false
+            referencedRelation: "association_types"
+            referencedColumns: ["code"]
+          },
           {
             foreignKeyName: "cities_created_by_fkey"
             columns: ["created_by"]
@@ -367,6 +416,24 @@ export type Database = {
           },
         ]
       }
+      editable_fields: {
+        Row: {
+          added_at: string
+          applies_to_table: string
+          field_name: string
+        }
+        Insert: {
+          added_at?: string
+          applies_to_table: string
+          field_name: string
+        }
+        Update: {
+          added_at?: string
+          applies_to_table?: string
+          field_name?: string
+        }
+        Relationships: []
+      }
       holding_edits: {
         Row: {
           city_id: string
@@ -376,8 +443,11 @@ export type Database = {
           edited_at: string
           edited_by: string
           holding_id: string
+          holding_type: string
           id: string
+          operation_id: string | null
           payload: Json
+          target_was_stale: boolean
         }
         Insert: {
           city_id: string
@@ -387,8 +457,11 @@ export type Database = {
           edited_at?: string
           edited_by: string
           holding_id: string
+          holding_type?: string
           id?: string
+          operation_id?: string | null
           payload: Json
+          target_was_stale?: boolean
         }
         Update: {
           city_id?: string
@@ -398,8 +471,11 @@ export type Database = {
           edited_at?: string
           edited_by?: string
           holding_id?: string
+          holding_type?: string
           id?: string
+          operation_id?: string | null
           payload?: Json
+          target_was_stale?: boolean
         }
         Relationships: [
           {
@@ -436,6 +512,8 @@ export type Database = {
           border_south: string | null
           border_west: string | null
           city_id: string
+          completed_at: string | null
+          completed_by: string | null
           created_at: string
           credit_type: string
           crop_type: string | null
@@ -461,6 +539,9 @@ export type Database = {
           person_id: string | null
           qirat: number
           reform_type: string | null
+          reviewed: boolean
+          reviewed_at: string | null
+          reviewed_by: string | null
           sahm: number
           soil_type: string | null
           total_sqm: number | null
@@ -478,6 +559,8 @@ export type Database = {
           border_south?: string | null
           border_west?: string | null
           city_id: string
+          completed_at?: string | null
+          completed_by?: string | null
           created_at?: string
           credit_type?: string
           crop_type?: string | null
@@ -503,6 +586,9 @@ export type Database = {
           person_id?: string | null
           qirat?: number
           reform_type?: string | null
+          reviewed?: boolean
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           sahm?: number
           soil_type?: string | null
           total_sqm?: number | null
@@ -520,6 +606,8 @@ export type Database = {
           border_south?: string | null
           border_west?: string | null
           city_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
           created_at?: string
           credit_type?: string
           crop_type?: string | null
@@ -545,6 +633,9 @@ export type Database = {
           person_id?: string | null
           qirat?: number
           reform_type?: string | null
+          reviewed?: boolean
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           sahm?: number
           soil_type?: string | null
           total_sqm?: number | null
@@ -561,11 +652,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "holdings_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "holdings_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "team_activity"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "holdings_import_batch_id_fkey"
             columns: ["import_batch_id"]
             isOneToOne: false
             referencedRelation: "import_batches"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "holdings_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "holdings_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "team_activity"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -579,6 +698,7 @@ export type Database = {
           imported_by: string
           mapping_used: Json | null
           rejection_log: Json | null
+          rows_duplicate: number | null
           rows_imported: number
           rows_rejected: number
           rows_total: number
@@ -594,6 +714,7 @@ export type Database = {
           imported_by: string
           mapping_used?: Json | null
           rejection_log?: Json | null
+          rows_duplicate?: number | null
           rows_imported?: number
           rows_rejected?: number
           rows_total?: number
@@ -609,6 +730,7 @@ export type Database = {
           imported_by?: string
           mapping_used?: Json | null
           rejection_log?: Json | null
+          rows_duplicate?: number | null
           rows_imported?: number
           rows_rejected?: number
           rows_total?: number
@@ -886,6 +1008,7 @@ export type Database = {
         Row: {
           city_id: string | null
           holder_name: string | null
+          holding_id_number: string | null
           holdings_count: number | null
           national_id: string | null
           total_feddan: number | null
@@ -1119,6 +1242,8 @@ export type Database = {
           border_south: string | null
           border_west: string | null
           city_id: string
+          completed_at: string | null
+          completed_by: string | null
           created_at: string
           credit_type: string
           crop_type: string | null
@@ -1144,6 +1269,9 @@ export type Database = {
           person_id: string | null
           qirat: number
           reform_type: string | null
+          reviewed: boolean
+          reviewed_at: string | null
+          reviewed_by: string | null
           sahm: number
           soil_type: string | null
           total_sqm: number | null
@@ -1347,9 +1475,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       association_type: ["agricultural_credit", "agricultural_reform"],

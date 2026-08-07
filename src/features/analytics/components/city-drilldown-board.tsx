@@ -5,6 +5,7 @@ import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useCityDrilldown, useBasinBreakdown, useTopHolders } from "../hooks/use-city-analytics";
+import { BasinBreakdownChart } from "./basin-breakdown-chart";
 import { formatNumber, formatRoundedNumber, formatDate } from "@/lib/format";
 
 /** Board 2 — per-city drilldown: headline stats, basin breakdown, top holders. */
@@ -41,27 +42,7 @@ export function CityDrilldownBoard({ cityId }: { cityId: string }) {
         />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>توزيع الأحواض</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!basins || basins.length === 0 ? (
-            <EmptyState title="لا توجد بيانات أحواض" />
-          ) : (
-            <div className="space-y-2">
-              {basins.map((b) => (
-                <div key={b.basin_name} className="flex items-center justify-between text-sm">
-                  <span>{b.basin_name}</span>
-                  <span className="text-muted-foreground">
-                    {formatNumber(b.holdings_count)} حيازة — {formatRoundedNumber(b.total_feddan)} فدان
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <BasinBreakdownChart basins={basins ?? []} />
 
       <Card>
         <CardHeader>

@@ -12,6 +12,7 @@ export interface City {
   directorate: string | null;
   status: CityStatus;
   associationType: AssociationType | null;
+  associationTypeCode: string | null;
   associationSubtype: string | null;
   dataVersion: number;
   createdAt: string;
@@ -28,6 +29,7 @@ export interface CreateCityInput {
   administration?: string;
   directorate?: string;
   associationType?: AssociationType | null;
+  associationTypeCode?: string | null;
   associationSubtype?: string | null;
 }
 
@@ -36,6 +38,7 @@ export interface UpdateCityInput {
   administration?: string;
   directorate?: string;
   associationType?: AssociationType | null;
+  associationTypeCode?: string | null;
   associationSubtype?: string | null;
 }
 
