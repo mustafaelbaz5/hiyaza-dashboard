@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { AlertTriangle } from "lucide-react";
 import type { AuditEntryWithUser } from "../types";
 
 const ENTITY_LABELS: Record<AuditEntryWithUser["entityType"], string> = {
@@ -27,7 +28,17 @@ export function AuditEntrySummary({ entry }: { entry: AuditEntryWithUser }) {
           استورد {String(d.file_name)} — {String(d.rows_imported)} صف
         </span>
       ) : null}
-      {entry.entityType === "holding_edit" ? <span>عدّل بيانات حيازة</span> : null}
+      {entry.entityType === "holding_edit" ? (
+        <span className="flex items-center gap-1.5">
+          عدّل بيانات حيازة
+          {d.target_was_stale ? (
+            <Badge variant="outline" className="gap-1 border-amber-500 text-amber-700">
+              <AlertTriangle className="size-3" />
+              حيازة قديمة
+            </Badge>
+          ) : null}
+        </span>
+      ) : null}
       {entry.entityType === "added_holding" ? (
         <span>
           {String(d.holder_name)} — {STATUS_LABELS[String(d.status)] ?? String(d.status)}

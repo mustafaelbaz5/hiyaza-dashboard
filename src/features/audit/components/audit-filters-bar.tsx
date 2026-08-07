@@ -7,6 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { AuditEntityType, AuditFilters } from "../types";
 
 interface AuditFiltersBarProps {
@@ -79,8 +82,25 @@ export function AuditFiltersBar({ filters, onFiltersChange }: AuditFiltersBarPro
         placeholder="إلى تاريخ"
       />
 
+      {/* Stale-target filter — edits that landed on an already-superseded holding, per
+          holding_edits.target_was_stale. Signal only: it never rejects a write, just flags it
+          for review (REFACTOR_ROADMAP.md Phase 3). */}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className={cn(
+          "gap-1.5",
+          filters.staleOnly && "border-amber-500 bg-amber-50 text-amber-700 hover:bg-amber-100",
+        )}
+        onClick={() => onFiltersChange({ ...filters, staleOnly: filters.staleOnly ? undefined : true })}
+      >
+        <AlertTriangle className="size-3.5" />
+        تعديلات على حيازات قديمة
+      </Button>
+
       {/* Clear Filters */}
-      {(filters.entityType || filters.dateFrom || filters.dateTo || filters.cityId || filters.userId) && (
+      {(filters.entityType || filters.dateFrom || filters.dateTo || filters.cityId || filters.userId || filters.staleOnly) && (
         <button
           onClick={() =>
             onFiltersChange({

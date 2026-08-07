@@ -38,6 +38,7 @@ export interface BulkApplyFieldInput {
 
 export interface HoldingsRepository {
   list(params: HoldingsListParams): Promise<Result<HoldingsListResult, AppError>>;
+  getById(holdingId: string): Promise<Result<MergedHolding | null, AppError>>;
   applyEdit(input: ApplyEditInput): Promise<Result<void, AppError>>;
   bulkApplyField(input: BulkApplyFieldInput): Promise<Result<number, AppError>>;
   listBasins(cityId: string): Promise<Result<string[], AppError>>;

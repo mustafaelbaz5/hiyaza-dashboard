@@ -31,6 +31,9 @@ export const queryKeys = {
   users: {
     all: ["users"] as const,
   },
+  associationTypes: {
+    all: ["association-types"] as const,
+  },
   profile: {
     current: ["profile", "current"] as const,
   },

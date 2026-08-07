@@ -55,6 +55,12 @@ export function ImportHistory({ cityId }: { cityId: string }) {
       cell: ({ row }) => <Badge variant="secondary">{STATUS_LABELS[row.original.status] ?? row.original.status}</Badge>,
     },
     { accessorKey: "rowsImported", header: "صفوف مستوردة" },
+    {
+      accessorKey: "rowsDuplicate",
+      header: "صفوف مكررة",
+      cell: ({ row }) =>
+        row.original.rowsDuplicate === null ? "—" : row.original.rowsDuplicate,
+    },
     { accessorKey: "rowsRejected", header: "صفوف فارغة/فشلت" },
     {
       accessorKey: "committedAt",

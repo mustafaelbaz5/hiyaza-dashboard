@@ -23,6 +23,9 @@ export interface AuditFilters {
   entityType?: AuditEntityType;
   dateFrom?: string;
   dateTo?: string;
+  /** Only holding_edit entries whose target holding was already stale when the edit landed —
+   *  a signal the edit may be orphaned/conflicting (holding_edits.target_was_stale). */
+  staleOnly?: boolean;
 }
 
 export interface HoldingEditDiff {
@@ -31,7 +34,19 @@ export interface HoldingEditDiff {
   after: unknown;
 }
 
+export interface HoldingEditHistoryEntry {
+  editId: string;
+  editedAt: string;
+  editedBy: string | null;
+  editedByDisplayName: string | null;
+  editedByEmail: string | null;
+  holdingType?: "holding" | "added_holding";
+  targetWasStale?: boolean;
+  operationId?: string | null;
+}
+
 export interface AuditRepository {
   listFeed(filters: AuditFilters): Promise<Result<AuditEntryWithUser[], AppError>>;
   getHoldingEditDiff(holdingId: string, editId: string): Promise<Result<HoldingEditDiff[], AppError>>;
+  listHoldingEditHistory(holdingId: string): Promise<Result<HoldingEditHistoryEntry[], AppError>>;
 }

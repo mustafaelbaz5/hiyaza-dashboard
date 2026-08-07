@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import type { ColumnDef, SortingState, RowSelectionState } from "@tanstack/react-table";
-import { PencilLine } from "lucide-react";
+import { PencilLine, SquareArrowOutUpRight } from "lucide-react";
 import { DataTable } from "@/components/shared/data-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ import { useBasins } from "../hooks/use-basins";
 import { ExportDialog } from "@/features/export/components/export-dialog";
 import { InlineEditCell } from "./inline-edit-cell";
 import { BulkEditDialog } from "./bulk-edit-dialog";
+import { ProvenanceBadge } from "./provenance-badge";
 import type { MergedHolding } from "../core/merge-holding";
 import type { HoldingsListFilters } from "../types";
 
@@ -52,6 +54,22 @@ function buildColumns(cityId: string): ColumnDef<MergedHolding>[] {
       header: "قيراط",
       cell: ({ row }) => <InlineEditCell holding={row.original} field="qirat" cityId={cityId} />,
     },
+    {
+      id: "provenance",
+      header: "المصدر",
+      cell: ({ row }) => <ProvenanceBadge provenance={row.original.provenance} />,
+    },
+    {
+      id: "details",
+      header: "",
+      cell: ({ row }) => (
+        <Button variant="ghost" size="icon" className="size-8" asChild>
+          <Link href={`/cities/${cityId}/holdings/${row.original.id}`} aria-label="عرض التفاصيل">
+            <SquareArrowOutUpRight className="size-4" />
+          </Link>
+        </Button>
+      ),
+    },
   ];
 }
 
@@ -77,10 +95,11 @@ export function HoldingsTable({ cityId }: { cityId: string }) {
 
   const columns = useMemo(() => buildColumns(cityId), [cityId]);
   const rows = useMemo(() => data?.rows ?? [], [data]);
-  const selectedIds = useMemo(
-    () => rows.filter((_, i) => rowSelection[i]).map((r) => r.id),
+  const selectedHoldings = useMemo(
+    () => rows.filter((_, i) => rowSelection[i]),
     [rows, rowSelection],
   );
+  const selectedIds = useMemo(() => selectedHoldings.map((r) => r.id), [selectedHoldings]);
 
   return (
     <div className="space-y-3">
@@ -147,7 +166,7 @@ export function HoldingsTable({ cityId }: { cityId: string }) {
 
       <BulkEditDialog
         cityId={cityId}
-        selectedIds={selectedIds}
+        selectedHoldings={selectedHoldings}
         open={bulkEditOpen}
         onOpenChange={setBulkEditOpen}
         onApplied={() => setRowSelection({})}

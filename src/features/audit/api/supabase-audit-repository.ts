@@ -4,7 +4,14 @@ import { ok, err } from "@/lib/result";
 import { fromSupabaseError } from "@/lib/errors";
 import { EDITABLE_FIELDS } from "@/features/holdings/core/editable-fields";
 import { normalizeEditPayload } from "@/features/holdings/core/merge-holding";
-import type { AuditEntry, AuditEntryWithUser, AuditFilters, AuditRepository, HoldingEditDiff } from "../types";
+import type {
+  AuditEntry,
+  AuditEntryWithUser,
+  AuditFilters,
+  AuditRepository,
+  HoldingEditDiff,
+  HoldingEditHistoryEntry,
+} from "../types";
 
 const FEED_LIMIT = 200;
 
@@ -25,6 +32,7 @@ export function createSupabaseAuditRepository(
       if (filters.entityType) query = query.eq("entity_type", filters.entityType);
       if (filters.dateFrom) query = query.gte("occurred_at", filters.dateFrom);
       if (filters.dateTo) query = query.lte("occurred_at", filters.dateTo);
+      if (filters.staleOnly) query = query.eq("details->>target_was_stale", "true");
 
       const { data, error } = await query;
       if (error) return err(fromSupabaseError(error));
@@ -90,6 +98,34 @@ export function createSupabaseAuditRepository(
       }
 
       return ok(diffs);
+    },
+
+    async listHoldingEditHistory(holdingId: string) {
+      const { data: edits, error: editsError } = await supabase
+        .from("holding_edits")
+        .select("id, edited_at, edited_by, holding_type, target_was_stale, operation_id")
+        .eq("holding_id", holdingId)
+        .order("edited_at", { ascending: false });
+      if (editsError) return err(fromSupabaseError(editsError));
+
+      const userIds = [...new Set((edits ?? []).map((e) => e.edited_by).filter((id): id is string => Boolean(id)))];
+      const { data: profiles } = userIds.length
+        ? await supabase.from("profiles").select("id, display_name, email").in("id", userIds)
+        : { data: [] };
+      const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
+
+      const history: HoldingEditHistoryEntry[] = (edits ?? []).map((e) => ({
+        editId: e.id,
+        editedAt: e.edited_at,
+        editedBy: e.edited_by,
+        editedByDisplayName: (e.edited_by && profileMap.get(e.edited_by)?.display_name) || null,
+        editedByEmail: (e.edited_by && profileMap.get(e.edited_by)?.email) || null,
+        holdingType: (e.holding_type as "holding" | "added_holding" | undefined) || "holding",
+        targetWasStale: e.target_was_stale || false,
+        operationId: e.operation_id || null,
+      }));
+
+      return ok(history);
     },
   };
 }

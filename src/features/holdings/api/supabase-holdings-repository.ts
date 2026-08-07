@@ -39,6 +39,25 @@ async function fetchLatestEdits(
   return map;
 }
 
+/**
+ * Which of these holding ids were promoted from added_holdings — the same lineage signal
+ * src/features/review reads via `added_holdings.promoted_holding_id` — used to mark a row's
+ * provenance as "added" instead of "original"/"modified".
+ */
+async function fetchPromotedHoldingIds(
+  supabase: SupabaseClient<Database>,
+  holdingIds: string[],
+): Promise<Set<string>> {
+  if (holdingIds.length === 0) return new Set();
+
+  const { data } = await supabase
+    .from(TABLES.addedHoldings)
+    .select("promoted_holding_id")
+    .in("promoted_holding_id", holdingIds);
+
+  return new Set((data ?? []).map((r) => r.promoted_holding_id).filter((id): id is string => id !== null));
+}
+
 /** Holdings repository backed by a real Supabase client — every read is merged with the latest edit overlay. */
 export function createSupabaseHoldingsRepository(
   supabase: SupabaseClient<Database>,
@@ -64,10 +83,33 @@ export function createSupabaseHoldingsRepository(
       if (error) return err(fromSupabaseError(error));
 
       const holdings = (data ?? []) as unknown as HoldingBaseRow[];
-      const editsByHolding = await fetchLatestEdits(supabase, holdings.map((h) => h.id));
-      const rows = holdings.map((h) => mergeHolding(h, editsByHolding.get(h.id) ?? null));
+      const holdingIds = holdings.map((h) => h.id);
+      const [editsByHolding, promotedIds] = await Promise.all([
+        fetchLatestEdits(supabase, holdingIds),
+        fetchPromotedHoldingIds(supabase, holdingIds),
+      ]);
+      const rows = holdings.map((h) =>
+        mergeHolding(h, editsByHolding.get(h.id) ?? null, promotedIds.has(h.id)),
+      );
 
       return ok({ rows, totalCount: count ?? 0 });
+    },
+
+    async getById(holdingId: string) {
+      const { data, error } = await supabase
+        .from(TABLES.holdings)
+        .select("*")
+        .eq("id", holdingId)
+        .maybeSingle();
+      if (error) return err(fromSupabaseError(error));
+      if (!data) return ok(null);
+
+      const base = data as unknown as HoldingBaseRow;
+      const [editsByHolding, promotedIds] = await Promise.all([
+        fetchLatestEdits(supabase, [base.id]),
+        fetchPromotedHoldingIds(supabase, [base.id]),
+      ]);
+      return ok(mergeHolding(base, editsByHolding.get(base.id) ?? null, promotedIds.has(base.id)));
     },
 
     async applyEdit(input: ApplyEditInput) {
@@ -145,8 +187,14 @@ export function createSupabaseHoldingsRepository(
       if (error) return err(fromSupabaseError(error));
 
       const holdings = (data ?? []) as unknown as HoldingBaseRow[];
-      const editsByHolding = await fetchLatestEdits(supabase, holdings.map((h) => h.id));
-      return ok(holdings.map((h) => mergeHolding(h, editsByHolding.get(h.id) ?? null)));
+      const holdingIds = holdings.map((h) => h.id);
+      const [editsByHolding, promotedIds] = await Promise.all([
+        fetchLatestEdits(supabase, holdingIds),
+        fetchPromotedHoldingIds(supabase, holdingIds),
+      ]);
+      return ok(
+        holdings.map((h) => mergeHolding(h, editsByHolding.get(h.id) ?? null, promotedIds.has(h.id))),
+      );
     },
 
     async listBasins(cityId: string) {

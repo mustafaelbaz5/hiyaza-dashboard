@@ -31,41 +31,69 @@ function makeRow(overrides: Partial<MappedHoldingRow> = {}): MappedHoldingRow {
 
 describe("validateRows", () => {
   it("accepts a well-formed row", () => {
-    const { valid, rejected } = validateRows([makeRow()]);
+    const { valid, blank } = validateRows([makeRow()]);
     expect(valid).toHaveLength(1);
-    expect(rejected).toHaveLength(0);
+    expect(blank).toHaveLength(0);
   });
 
-  it("rejects a row with no holder name", () => {
-    const { valid, rejected } = validateRows([makeRow({ holderName: null })]);
-    expect(valid).toHaveLength(0);
-    expect(rejected).toHaveLength(1);
-    expect(rejected[0]!.column).toBe("اسم الحائز");
+  it("imports a row with no holder name — missing business data is not an import error", () => {
+    const { valid, blank } = validateRows([makeRow({ holderName: null })]);
+    expect(valid).toHaveLength(1);
+    expect(blank).toHaveLength(0);
   });
 
   it("does not reject a malformed national id — imports it as-is for the quality board to flag", () => {
-    const { valid, rejected } = validateRows([makeRow({ nationalId: "not-a-valid-id" })]);
+    const { valid, blank } = validateRows([makeRow({ nationalId: "not-a-valid-id" })]);
     expect(valid).toHaveLength(1);
-    expect(rejected).toHaveLength(0);
+    expect(blank).toHaveLength(0);
     expect(valid[0]!.nationalId).toBe("not-a-valid-id");
   });
 
-  it("never double counts a row as both valid and rejected", () => {
+  it("never double counts a row as both valid and blank", () => {
     const rows = [makeRow(), makeRow({ holderName: null }), makeRow({ nationalId: "bad" })];
-    const { valid, rejected } = validateRows(rows);
-    expect(valid.length + rejected.length).toBe(rows.length);
+    const { valid, blank } = validateRows(rows);
+    expect(valid.length + blank.length).toBe(rows.length);
   });
 
-  it("rejects a fractional سهم — the real schema column is int and rounding would corrupt a legal land share", () => {
-    const { valid, rejected } = validateRows([makeRow({ sahm: 10.75 })]);
-    expect(valid).toHaveLength(0);
-    expect(rejected).toHaveLength(1);
-    expect(rejected[0]!.column).toBe("سهم");
+  it("imports a fractional سهم as-is — the source spreadsheet is the source of truth", () => {
+    const { valid, blank } = validateRows([makeRow({ sahm: 10.75 })]);
+    expect(valid).toHaveLength(1);
+    expect(blank).toHaveLength(0);
+    expect(valid[0]!.sahm).toBe(10.75);
   });
 
   it("accepts integer feddan/qirat/sahm", () => {
-    const { valid, rejected } = validateRows([makeRow({ feddan: 2, qirat: 5, sahm: 10 })]);
+    const { valid, blank } = validateRows([makeRow({ feddan: 2, qirat: 5, sahm: 10 })]);
     expect(valid).toHaveLength(1);
-    expect(rejected).toHaveLength(0);
+    expect(blank).toHaveLength(0);
+  });
+
+  it("sets aside a row with no data in any field as blank, not valid", () => {
+    const { valid, blank } = validateRows([
+      makeRow({
+        holdingIdNumber: null,
+        unifiedNumber: null,
+        holderName: null,
+        nationalId: null,
+        landNumber: null,
+        pageNumber: null,
+        basinCode: null,
+        basinName: null,
+        associationName: null,
+        administration: null,
+        directorate: null,
+        borderEast: null,
+        borderWest: null,
+        borderSouth: null,
+        borderNorth: null,
+        feddan: 0,
+        qirat: 0,
+        sahm: 0,
+        totalSqm: 0,
+      }),
+    ]);
+    expect(valid).toHaveLength(0);
+    expect(blank).toHaveLength(1);
+    expect(blank[0]!.row).toBe(4);
   });
 });

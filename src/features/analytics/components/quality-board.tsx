@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { QUALITY_RULES } from "../registry/quality-rules";
 import { useQualityData, useCaptureQualitySnapshot } from "../hooks/use-quality";
+import { useCities } from "@/features/cities/hooks/use-cities";
+import { QualityIssueDrilldown } from "./quality-issue-drilldown";
 import { formatNumber } from "@/lib/format";
 import { Camera } from "lucide-react";
 
@@ -28,9 +30,12 @@ function completenessColor(pct: number) {
 export function QualityBoard({ cityId }: { cityId?: string }) {
   const { completeness, issues } = useQualityData(cityId);
   const captureSnapshot = useCaptureQualitySnapshot(cityId ?? "");
+  const { data: cities } = useCities();
 
   const rows = completeness.data ?? [];
   const issueRows = issues.data ?? [];
+  const cityName = (id: string | null) =>
+    cities?.find((c) => c.id === id)?.name ?? id?.slice(0, 8) ?? "—";
 
   if (rows.length === 0 && !completeness.isLoading) {
     return <EmptyState title="لا توجد بيانات لتقييم الجودة" description="استورد بيانات جمعية أولاً" />;
@@ -71,7 +76,7 @@ export function QualityBoard({ cityId }: { cityId?: string }) {
             <tbody>
               {rows.map((row) => (
                 <tr key={row.city_id} className="border-t border-border">
-                  <td className="p-2 font-medium">{row.city_id?.slice(0, 8)}</td>
+                  <td className="p-2 font-medium">{cityName(row.city_id)}</td>
                   {COMPLETENESS_FIELDS.map((f) => {
                     const pct = row[f.key] ?? 0;
                     return (
@@ -93,22 +98,39 @@ export function QualityBoard({ cityId }: { cityId?: string }) {
         </CardHeader>
         <CardContent className="space-y-2">
           {issueRows.map((row) => (
-            <div key={row.city_id} className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">{row.city_id?.slice(0, 8)}</p>
-              <div className="flex flex-wrap gap-2">
-                {QUALITY_RULES.map((rule) => {
-                  const count = row[rule.key] ?? 0;
-                  if (!count) return null;
-                  return (
-                    <Badge
-                      key={rule.key}
-                      variant={rule.severity === "error" ? "destructive" : "secondary"}
-                    >
-                      {rule.label}: {formatNumber(count)}
-                    </Badge>
-                  );
-                })}
-              </div>
+            <div key={row.city_id} className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">{cityName(row.city_id)}</p>
+              {cityId && row.city_id ? (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {QUALITY_RULES.map((rule) => {
+                    const count = row[rule.key] ?? 0;
+                    if (!count) return null;
+                    return (
+                      <QualityIssueDrilldown
+                        key={rule.key}
+                        cityId={row.city_id as string}
+                        rule={rule}
+                        count={count}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {QUALITY_RULES.map((rule) => {
+                    const count = row[rule.key] ?? 0;
+                    if (!count) return null;
+                    return (
+                      <Badge
+                        key={rule.key}
+                        variant={rule.severity === "error" ? "destructive" : "secondary"}
+                      >
+                        {rule.label}: {formatNumber(count)}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           ))}
         </CardContent>

@@ -16,6 +16,7 @@ function toCity(row: CityRow): City {
     directorate: row.directorate,
     status: row.status,
     associationType: row.association_type,
+    associationTypeCode: row.association_type_code,
     associationSubtype: row.association_subtype,
     dataVersion: row.data_version,
     createdAt: row.created_at,
@@ -78,6 +79,7 @@ export function createSupabaseCitiesRepository(
           administration: input.administration ?? null,
           directorate: input.directorate ?? null,
           association_type: input.associationType ?? null,
+          association_type_code: input.associationTypeCode ?? null,
           association_subtype: input.associationSubtype ?? null,
           created_by: user?.id,
         })
@@ -96,6 +98,7 @@ export function createSupabaseCitiesRepository(
           ...(input.administration !== undefined && { administration: input.administration }),
           ...(input.directorate !== undefined && { directorate: input.directorate }),
           ...(input.associationType !== undefined && { association_type: input.associationType }),
+          ...(input.associationTypeCode !== undefined && { association_type_code: input.associationTypeCode }),
           ...(input.associationSubtype !== undefined && {
             association_subtype: input.associationSubtype,
           }),
