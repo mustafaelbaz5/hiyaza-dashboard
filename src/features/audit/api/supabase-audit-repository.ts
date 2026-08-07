@@ -32,6 +32,7 @@ export function createSupabaseAuditRepository(
       if (filters.entityType) query = query.eq("entity_type", filters.entityType);
       if (filters.dateFrom) query = query.gte("occurred_at", filters.dateFrom);
       if (filters.dateTo) query = query.lte("occurred_at", filters.dateTo);
+      if (filters.staleOnly) query = query.eq("details->>target_was_stale", "true");
 
       const { data, error } = await query;
       if (error) return err(fromSupabaseError(error));

@@ -23,6 +23,9 @@ export interface AuditFilters {
   entityType?: AuditEntityType;
   dateFrom?: string;
   dateTo?: string;
+  /** Only holding_edit entries whose target holding was already stale when the edit landed —
+   *  a signal the edit may be orphaned/conflicting (holding_edits.target_was_stale). */
+  staleOnly?: boolean;
 }
 
 export interface HoldingEditDiff {
