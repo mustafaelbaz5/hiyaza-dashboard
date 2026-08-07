@@ -11,6 +11,12 @@ export type QualityIssues = Database["public"]["Views"]["city_quality_issues"]["
 export type TeamActivityRow = Database["public"]["Views"]["team_activity"]["Row"];
 export type QualitySnapshot = Database["public"]["Tables"]["quality_snapshots"]["Row"];
 
+export interface QualityIssueHolding {
+  id: string;
+  holdingIdNumber: string | null;
+  holderName: string | null;
+}
+
 export interface AnalyticsRepository {
   getSystemOverview(): Promise<Result<SystemOverview | null, AppError>>;
   getCityDrilldown(cityId: string): Promise<Result<CityDrilldown | null, AppError>>;
@@ -18,6 +24,11 @@ export interface AnalyticsRepository {
   getTopHolders(cityId: string, limit: number): Promise<Result<TopHolder[], AppError>>;
   getFieldCompleteness(cityId?: string): Promise<Result<FieldCompleteness[], AppError>>;
   getQualityIssues(cityId?: string): Promise<Result<QualityIssues[], AppError>>;
+  /** The actual holdings affected by one quality rule, for the "make it actionable" drill-down. */
+  getQualityIssueHoldings(
+    cityId: string,
+    ruleKey: keyof Omit<QualityIssues, "city_id">,
+  ): Promise<Result<QualityIssueHolding[], AppError>>;
   getTeamActivity(): Promise<Result<TeamActivityRow[], AppError>>;
   captureQualitySnapshot(cityId: string): Promise<Result<QualitySnapshot, AppError>>;
   getQualitySnapshotHistory(cityId: string): Promise<Result<QualitySnapshot[], AppError>>;

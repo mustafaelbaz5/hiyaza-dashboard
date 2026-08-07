@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { QUALITY_RULES } from "../registry/quality-rules";
 import { useQualityData, useCaptureQualitySnapshot } from "../hooks/use-quality";
 import { useCities } from "@/features/cities/hooks/use-cities";
+import { QualityIssueDrilldown } from "./quality-issue-drilldown";
 import { formatNumber } from "@/lib/format";
 import { Camera } from "lucide-react";
 
@@ -97,22 +98,39 @@ export function QualityBoard({ cityId }: { cityId?: string }) {
         </CardHeader>
         <CardContent className="space-y-2">
           {issueRows.map((row) => (
-            <div key={row.city_id} className="space-y-1">
+            <div key={row.city_id} className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">{cityName(row.city_id)}</p>
-              <div className="flex flex-wrap gap-2">
-                {QUALITY_RULES.map((rule) => {
-                  const count = row[rule.key] ?? 0;
-                  if (!count) return null;
-                  return (
-                    <Badge
-                      key={rule.key}
-                      variant={rule.severity === "error" ? "destructive" : "secondary"}
-                    >
-                      {rule.label}: {formatNumber(count)}
-                    </Badge>
-                  );
-                })}
-              </div>
+              {cityId && row.city_id ? (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {QUALITY_RULES.map((rule) => {
+                    const count = row[rule.key] ?? 0;
+                    if (!count) return null;
+                    return (
+                      <QualityIssueDrilldown
+                        key={rule.key}
+                        cityId={row.city_id as string}
+                        rule={rule}
+                        count={count}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {QUALITY_RULES.map((rule) => {
+                    const count = row[rule.key] ?? 0;
+                    if (!count) return null;
+                    return (
+                      <Badge
+                        key={rule.key}
+                        variant={rule.severity === "error" ? "destructive" : "secondary"}
+                      >
+                        {rule.label}: {formatNumber(count)}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           ))}
         </CardContent>
