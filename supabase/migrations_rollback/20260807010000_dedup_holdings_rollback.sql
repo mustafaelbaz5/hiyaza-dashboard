@@ -1,0 +1,9 @@
+-- Rollback for 20260807010000_dedup_holdings.sql.
+--
+-- NOT TRIVIAL: this migration deleted 3,957 rows and repointed 2,424 holding_edits +
+-- 105 added_holdings references. There is no automated rollback — reversing it requires restoring
+-- the deleted holdings rows (their exact original data) and reverting every repointed FK to its
+-- original non-keeper id, which are not recoverable from the post-migration database alone.
+--
+-- If rollback is genuinely needed: restore from a pre-migration backup/PITR snapshot taken before
+-- 2026-08-07's dedup run, rather than attempting a partial in-place reversal.
