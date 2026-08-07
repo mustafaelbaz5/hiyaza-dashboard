@@ -698,6 +698,7 @@ export type Database = {
           imported_by: string
           mapping_used: Json | null
           rejection_log: Json | null
+          rows_duplicate: number | null
           rows_imported: number
           rows_rejected: number
           rows_total: number
@@ -713,6 +714,7 @@ export type Database = {
           imported_by: string
           mapping_used?: Json | null
           rejection_log?: Json | null
+          rows_duplicate?: number | null
           rows_imported?: number
           rows_rejected?: number
           rows_total?: number
@@ -728,6 +730,7 @@ export type Database = {
           imported_by?: string
           mapping_used?: Json | null
           rejection_log?: Json | null
+          rows_duplicate?: number | null
           rows_imported?: number
           rows_rejected?: number
           rows_total?: number

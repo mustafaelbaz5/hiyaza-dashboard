@@ -12,6 +12,9 @@ export interface ImportBatchSummary {
   rowsTotal: number;
   rowsImported: number;
   rowsRejected: number;
+  /** Rows skipped as duplicates of an already-imported holding. Null for batches committed
+   *  before the dedup guard shipped (2026-08-07) — genuinely unknown, not zero. */
+  rowsDuplicate: number | null;
   importedBy: string;
   createdAt: string;
   committedAt: string | null;

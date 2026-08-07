@@ -26,6 +26,7 @@ function toBatchSummary(row: ImportBatchRow): ImportBatchSummary {
     rowsTotal: row.rows_total,
     rowsImported: row.rows_imported,
     rowsRejected: row.rows_rejected,
+    rowsDuplicate: row.rows_duplicate,
     importedBy: row.imported_by,
     createdAt: row.created_at,
     committedAt: row.committed_at,
